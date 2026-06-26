@@ -1,0 +1,199 @@
+{
+  "sources": [
+    {
+      "source": "project_raw_jsonl",
+      "path": "F:\\Capstone Project\\prompt-injection-detector\\data\\raw\\Prompt_INJECTION_And_Benign_DATASET.jsonl",
+      "rows": 500,
+      "columns": [
+        "id",
+        "prompt",
+        "label",
+        "attack_type",
+        "context",
+        "response",
+        "label_normalized"
+      ]
+    },
+    {
+      "source": "direct_ml_ready",
+      "path": "F:\\Capstone Project\\prompt-injection-detector\\datasets\\processed\\direct_ml_ready.csv",
+      "rows": 1160,
+      "columns": [
+        "sample_id",
+        "task_type",
+        "label",
+        "original_text",
+        "detected_language",
+        "canonical_text",
+        "ml_text",
+        "user_prompt",
+        "context",
+        "source",
+        "source_split"
+      ]
+    },
+    {
+      "source": "direct_merged",
+      "path": "F:\\Capstone Project\\prompt-injection-detector\\datasets\\processed\\direct_merged.csv",
+      "rows": 1160,
+      "columns": [
+        "text",
+        "label",
+        "source",
+        "source_split"
+      ]
+    },
+    {
+      "source": "augmented_multilingual_dataset",
+      "path": "F:\\Capstone Project\\prompt-injection-detector\\data\\processed\\augmented_multilingual_dataset.csv",
+      "rows": 41,
+      "columns": [
+        "original_prompt",
+        "augmented_prompt",
+        "label",
+        "attack_type",
+        "source"
+      ]
+    },
+    {
+      "source": "hard_negatives",
+      "path": "F:\\Capstone Project\\prompt-injection-detector\\datasets\\custom\\hard_negatives.csv",
+      "rows": 20,
+      "columns": [
+        "text",
+        "label",
+        "category",
+        "source",
+        "severity",
+        "split",
+        "language",
+        "augmented",
+        "dataset_config"
+      ]
+    },
+    {
+      "source": "role_override",
+      "path": "F:\\Capstone Project\\prompt-injection-detector\\datasets\\custom\\role_override.csv",
+      "rows": 20,
+      "columns": [
+        "text",
+        "label",
+        "category",
+        "source",
+        "severity",
+        "split",
+        "language",
+        "augmented",
+        "dataset_config"
+      ]
+    },
+    {
+      "source": "neuralchemy_core",
+      "rows": 6274,
+      "columns": [
+        "text",
+        "label",
+        "category",
+        "source",
+        "severity",
+        "group_id",
+        "augmented",
+        "tags",
+        "hf_split"
+      ]
+    },
+    {
+      "source": "neuralchemy_full",
+      "rows": 15919,
+      "columns": [
+        "text",
+        "label",
+        "category",
+        "source",
+        "severity",
+        "group_id",
+        "augmented",
+        "tags",
+        "hf_split"
+      ]
+    }
+  ],
+  "standard_schema": [
+    "text",
+    "label",
+    "category",
+    "source",
+    "severity",
+    "split",
+    "language",
+    "augmented",
+    "dataset_config"
+  ],
+  "raw_rows_after_standardization": 25094,
+  "unified_rows": 10148,
+  "ml_ready_rows": 7275,
+  "transformer_ready_rows": 10148,
+  "duplicates_removed": 14936,
+  "label_conflicts": 10,
+  "label_distribution": {
+    "0": 4159,
+    "1": 5989
+  },
+  "category_distribution": {
+    "benign": 4033,
+    "direct_injection": 3493,
+    "adversarial": 712,
+    "jailbreak": 592,
+    "encoding": 288,
+    "training_extraction": 130,
+    "edge_case": 87,
+    "token_smuggling": 67,
+    "system_manipulation": 62,
+    "rag_poisoning": 56,
+    "agent_manipulation": 54,
+    "persona_replacement": 51,
+    "instruction_override": 49,
+    "context_confusion": 41,
+    "prompt_injection": 36,
+    "multi_turn": 36,
+    "control": 35,
+    "prompt_extraction": 35,
+    "output_manipulation": 34,
+    "response_manipulation": 31,
+    "payload_injection": 29,
+    "system_extraction": 27,
+    "model_fingerprinting": 26,
+    "hard_negative": 20,
+    "indirect_injection": 17,
+    "benign_general": 15,
+    "crescendo": 15,
+    "encoding_obfuscation": 13,
+    "role_override": 12,
+    "many_shot": 11,
+    "token_injection": 7,
+    "jailbreaking": 6,
+    "prompt_leak": 6,
+    "code_execution": 6,
+    "none": 4,
+    "role_playing": 3,
+    "cyber_abuse": 3,
+    "chain_of_thought": 3,
+    "authority_escalation": 3
+  },
+  "language_distribution": {
+    "en": 9855,
+    "vi": 168,
+    "unknown": 125
+  },
+  "split_distribution": {
+    "train": 8331,
+    "test": 911,
+    "validation": 906
+  },
+  "paths": {
+    "unified": "F:\\Capstone Project\\prompt-injection-detector\\datasets\\unified\\prompt_injection_unified.csv",
+    "ml_ready": "F:\\Capstone Project\\prompt-injection-detector\\datasets\\unified\\prompt_injection_ml_ready.csv",
+    "transformer_ready": "F:\\Capstone Project\\prompt-injection-detector\\datasets\\unified\\prompt_injection_transformer_ready.csv",
+    "label_conflicts": "F:\\Capstone Project\\prompt-injection-detector\\datasets\\reports\\label_conflicts.csv"
+  }
+}

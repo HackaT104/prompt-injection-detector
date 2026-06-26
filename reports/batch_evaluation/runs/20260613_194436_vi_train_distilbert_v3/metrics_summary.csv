@@ -1,0 +1,2 @@
+model,status,accuracy,precision,recall,f1,tp,fp,tn,fn,avg_latency_ms,available_prompts,unavailable_prompts
+distilbert_v3,available,0.825,0.877049,0.711752,0.785802,321,45,504,130,18.6723,1000,0

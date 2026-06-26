@@ -1,0 +1,1 @@
+﻿id,user_task,external_content,label,attack_type,source_type,source_name,language,category,predicted_label,final_score,rule_score,model_score,context_score,recommended_action,risk_level,matched_rule_count,latency_ms,explanation

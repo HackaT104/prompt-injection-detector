@@ -1,0 +1,36 @@
+# Python / local environment
+.venv/
+__pycache__/
+*.py[cod]
+*.pyo
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.matplotlib/
+
+# Local config / secrets
+.env
+.env.*
+
+# Runtime and training artifacts
+outputs/
+models/
+logs/
+training/runs/
+
+# Large generated datasets.
+# Keep small hand-written/test datasets in Git, but do not commit external or processed corpora.
+datasets/external/
+datasets/processed/
+datasets/unified/
+
+# Temporary test/runtime folders
+.tmp_pytest*/
+tmp/
+
+# Generated report binaries / machine-readable dumps
+reports/*.png
+reports/**/*.png
+reports/*.json
+reports/**/*.json

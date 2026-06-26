@@ -1,0 +1,2 @@
+model,status,accuracy,precision,recall,f1,tp,fp,tn,fn,avg_latency_ms,available_prompts,unavailable_prompts
+linear_svm,available,0.584,0.520858,0.968958,0.677519,437,402,147,14,2.50464,1000,0

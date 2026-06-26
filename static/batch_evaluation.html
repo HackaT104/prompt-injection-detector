@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Batch Dataset Evaluation</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #08111f;
+      --panel: #121e30;
+      --panel-2: #17263a;
+      --border: #2c3d55;
+      --text: #eef5ff;
+      --muted: #9db1ca;
+      --accent: #25d0d9;
+      --safe: #24c783;
+      --warn: #f6b43b;
+      --danger: #f26b6b;
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top left, rgba(37, 208, 217, 0.15), transparent 34%), var(--bg);
+      color: var(--text);
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 4;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px clamp(18px, 4vw, 48px);
+      border-bottom: 1px solid var(--border);
+      background: rgba(8, 17, 31, 0.9);
+      backdrop-filter: blur(16px);
+    }
+    h1, h2, h3 { margin: 0; letter-spacing: 0; }
+    h1 { font-size: clamp(24px, 3vw, 34px); }
+    p { margin: 0; color: var(--muted); }
+    a { color: #a8e9ff; text-decoration: none; }
+    main {
+      display: grid;
+      grid-template-columns: minmax(280px, 390px) minmax(0, 1fr);
+      gap: 18px;
+      padding: 22px clamp(18px, 4vw, 48px) 42px;
+    }
+    .panel {
+      background: linear-gradient(180deg, rgba(23, 38, 58, 0.95), rgba(18, 30, 48, 0.95));
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+    .panel-body { padding: 16px 18px; }
+    .stack { display: grid; gap: 14px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    label { display: grid; gap: 7px; color: var(--muted); font-size: 13px; }
+    input[type="file"], input[type="text"], select, textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: #0e1828;
+      color: var(--text);
+      border-radius: 7px;
+      padding: 11px 12px;
+      font: inherit;
+    }
+    textarea { min-height: 120px; resize: vertical; }
+    .models { display: grid; gap: 8px; }
+    .check-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 10px 12px;
+      background: #0f1a2b;
+      color: var(--text);
+    }
+    .check-row span { color: var(--text); font-weight: 700; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    button {
+      border: 1px solid var(--border);
+      background: #101c2e;
+      color: var(--text);
+      border-radius: 7px;
+      padding: 11px 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    button.primary { background: linear-gradient(135deg, #25d0d9, #40d18c); color: #05111a; border: none; }
+    button.secondary { background: #142236; }
+    button.danger { border-color: rgba(242, 107, 107, 0.45); color: #ffc4c4; }
+    button:disabled { opacity: 0.55; cursor: wait; }
+    .status-line { display: grid; gap: 8px; }
+    .progress { height: 10px; background: #0a1422; border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
+    .progress > div { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--safe)); transition: width 0.25s ease; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 78px;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+    .allow { background: rgba(36, 199, 131, 0.16); color: #7cf1bd; }
+    .warn { background: rgba(246, 180, 59, 0.17); color: #ffd98c; }
+    .block { background: rgba(242, 107, 107, 0.17); color: #ffb2b2; }
+    .model_not_ready { background: rgba(157, 177, 202, 0.18); color: #d7e2f0; }
+    .metric-grid { display: grid; grid-template-columns: repeat(4, minmax(140px, 1fr)); gap: 10px; }
+    .metric {
+      border: 1px solid var(--border);
+      background: #101b2d;
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .metric span { display: block; color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+    .metric strong { font-size: 20px; }
+    .table-wrap { overflow: auto; border: 1px solid var(--border); border-radius: 8px; }
+    table { width: 100%; min-width: 980px; border-collapse: collapse; }
+    th, td { padding: 10px 11px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+    th { position: sticky; top: 0; background: #132033; color: #b9c9dd; font-size: 12px; z-index: 1; }
+    td { color: #edf4ff; font-size: 13px; }
+    tr.false-positive { background: rgba(246, 180, 59, 0.07); }
+    tr.false-negative { background: rgba(242, 107, 107, 0.08); }
+    tr.disagreement { outline: 1px solid rgba(37, 208, 217, 0.35); outline-offset: -1px; }
+    code { color: #aeeaff; }
+    .hint { color: var(--muted); font-size: 12px; }
+    .error { color: #ffb2b2; min-height: 20px; }
+    .hidden { display: none !important; }
+    pre {
+      max-height: 340px;
+      overflow: auto;
+      background: #091321;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      color: #cde4ff;
+    }
+    @media (max-width: 1100px) {
+      main { grid-template-columns: 1fr; }
+      .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 680px) {
+      header { align-items: flex-start; flex-direction: column; }
+      .grid-2, .metric-grid { grid-template-columns: 1fr; }
+      .actions button { flex: 1 1 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Batch Dataset Evaluation</h1>
+      <p>Upload prompt datasets, compare models in batch, export full prediction reports.</p>
+    </div>
+    <nav class="actions">
+      <a href="/advanced-demo"><button class="secondary">Advanced Demo</button></a>
+      <a href="/chat-simulation"><button class="secondary">Chat Simulation</button></a>
+    </nav>
+  </header>
+
+  <main>
+    <aside class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Dataset & Models</h2>
+          <p>CSV, JSON, JSONL or TXT.</p>
+        </div>
+      </div>
+      <div class="panel-body stack">
+        <label>Upload dataset file
+          <input id="fileInput" type="file" accept=".csv,.json,.jsonl,.txt" />
+        </label>
+        <label>Dataset name
+          <input id="datasetName" type="text" placeholder="batch_test_sample.csv" />
+        </label>
+        <label>Max prompts
+          <input id="maxItems" type="text" value="1000" />
+        </label>
+        <div class="models">
+          <label class="check-row"><span>Logistic Regression</span><input type="checkbox" name="model" value="logistic_regression" checked /></label>
+          <label class="check-row"><span>Linear SVM</span><input type="checkbox" name="model" value="linear_svm" checked /></label>
+          <label class="check-row"><span>Random Forest</span><input type="checkbox" name="model" value="random_forest" checked /></label>
+          <label class="check-row"><span>DistilBERT (deprecated)</span><input type="checkbox" name="model" value="distilbert" /></label>
+          <label class="check-row"><span>RoBERTa v5 VI</span><input type="checkbox" name="model" value="roberta" /></label>
+          <label class="check-row"><span>XLM-RoBERTa v5 VI</span><input type="checkbox" name="model" value="xlm_roberta" /></label>
+          <label class="check-row"><span>DistilBERT v3</span><input type="checkbox" name="model" value="distilbert_v3" /></label>
+          <label class="check-row"><span>RoBERTa v3</span><input type="checkbox" name="model" value="roberta_v3" /></label>
+          <label class="check-row"><span>XLM-RoBERTa v3</span><input type="checkbox" name="model" value="xlm_roberta_v3" /></label>
+          <label class="check-row"><span>Hybrid</span><input type="checkbox" name="model" value="hybrid" checked /></label>
+        </div>
+        <div class="grid-2">
+          <label>Hybrid traditional
+            <select id="traditionalModel">
+              <option value="random_forest">Random Forest</option>
+              <option value="all">All Traditional</option>
+              <option value="logistic_regression">Logistic Regression</option>
+              <option value="linear_svm">Linear SVM</option>
+            </select>
+          </label>
+          <label>Hybrid transformer
+            <select id="transformerModel">
+              <option value="distilbert">DistilBERT (deprecated)</option>
+              <option value="roberta" selected>RoBERTa v5 VI (fallback v4)</option>
+              <option value="xlm_roberta">XLM-RoBERTa v5 VI (fallback v4)</option>
+              <option value="distilbert_v3">DistilBERT v3</option>
+              <option value="roberta_v3">RoBERTa v3</option>
+              <option value="xlm_roberta_v3">XLM-RoBERTa v3</option>
+            </select>
+          </label>
+        </div>
+        <div class="grid-2">
+          <label>Hybrid strategy
+            <select id="decisionStrategy">
+              <option value="weighted_voting">Weighted Vote</option>
+              <option value="majority_vote">Majority Vote</option>
+              <option value="maximum_risk">Max Risk</option>
+            </select>
+          </label>
+          <label>Rule-based
+            <select id="useRuleBased">
+              <option value="true">Enabled</option>
+              <option value="false">Disabled</option>
+            </select>
+          </label>
+        </div>
+        <div class="actions">
+          <button id="validateButton" class="secondary">Validate Dataset</button>
+          <button id="runButton" class="primary">Run Batch Evaluation</button>
+          <button id="cancelButton" class="danger" disabled>Cancel</button>
+        </div>
+        <div class="actions">
+          <button id="exportCsvButton" disabled>Export CSV</button>
+          <button id="exportJsonButton" disabled>Export JSON</button>
+          <button id="exportMdButton" disabled>Export Report</button>
+        </div>
+        <div class="status-line">
+          <span class="hint" id="statusText">Status: waiting for upload</span>
+          <div class="progress"><div id="progressBar"></div></div>
+          <div class="error" id="errorBox"></div>
+        </div>
+      </div>
+    </aside>
+
+    <section class="stack">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Dataset Preview</h2>
+            <p id="previewMeta">No dataset loaded.</p>
+          </div>
+        </div>
+        <div class="panel-body table-wrap">
+          <table id="previewTable">
+            <thead><tr><th>ID</th><th>Text</th><th>Label</th><th>Category</th><th>Source</th><th>Language</th></tr></thead>
+            <tbody><tr><td colspan="6">Upload a dataset to preview.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Summary Metrics</h2>
+            <p id="summaryMeta">Run evaluation to see metrics.</p>
+          </div>
+        </div>
+        <div class="panel-body stack">
+          <div class="metric-grid" id="summaryCards"></div>
+          <div class="table-wrap">
+            <table id="metricsTable">
+              <thead><tr><th>Model</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1</th><th>TP</th><th>FP</th><th>TN</th><th>FN</th><th>Avg latency</th></tr></thead>
+              <tbody><tr><td colspan="10">No metrics yet.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Full Predictions</h2>
+            <p>Search, filter, inspect disagreements and mismatches.</p>
+          </div>
+        </div>
+        <div class="panel-body stack">
+          <div class="grid-2">
+            <label>Search prompt
+              <input id="searchInput" type="text" placeholder="ignore previous instructions" />
+            </label>
+            <label>Action filter
+              <select id="actionFilter">
+                <option value="all">All actions</option>
+                <option value="allow">allow</option>
+                <option value="warn">warn</option>
+                <option value="block">block</option>
+                <option value="model_not_ready">model_not_ready</option>
+              </select>
+            </label>
+          </div>
+          <div class="grid-2">
+            <label>Model filter
+              <select id="modelFilter"><option value="all">All models</option></select>
+            </label>
+            <label>Mismatch filter
+              <select id="mismatchFilter">
+                <option value="all">All rows</option>
+                <option value="mismatch">Prediction != ground truth</option>
+                <option value="disagreement">Model disagreement</option>
+              </select>
+            </label>
+          </div>
+          <div class="table-wrap">
+            <table id="resultsTable">
+              <thead></thead>
+              <tbody><tr><td>No results yet.</td></tr></tbody>
+            </table>
+          </div>
+          <div>
+            <h3>Row detail</h3>
+            <pre id="rowDetail">Click a prediction row to inspect full model outputs.</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const state = {
+      items: [],
+      lastResponse: null,
+      abortController: null,
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const escapeHtml = (value) => String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+
+    function setStatus(text, progress = null) {
+      $("statusText").textContent = `Status: ${text}`;
+      if (progress !== null) $("progressBar").style.width = `${progress}%`;
+    }
+
+    function setError(message) {
+      $("errorBox").textContent = message || "";
+    }
+
+    function selectedModels() {
+      return Array.from(document.querySelectorAll('input[name="model"]:checked')).map((box) => box.value);
+    }
+
+    function hybridConfig() {
+      return {
+        traditional_model: $("traditionalModel").value,
+        transformer_model: $("transformerModel").value,
+        use_rule_based: $("useRuleBased").value === "true",
+        decision_strategy: $("decisionStrategy").value,
+      };
+    }
+
+    function requestPayload() {
+      return {
+        items: state.items,
+        models: selectedModels(),
+        hybrid_config: hybridConfig(),
+        dataset_name: $("datasetName").value || "uploaded_dataset",
+        max_items: Number($("maxItems").value || 500),
+      };
+    }
+
+    function parseCsvRows(text) {
+      const rows = [];
+      let row = [];
+      let cell = "";
+      let inQuotes = false;
+      for (let i = 0; i < text.length; i += 1) {
+        const char = text[i];
+        const next = text[i + 1];
+        if (char === '"' && inQuotes && next === '"') {
+          cell += '"';
+          i += 1;
+        } else if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === "," && !inQuotes) {
+          row.push(cell);
+          cell = "";
+        } else if ((char === "\n" || char === "\r") && !inQuotes) {
+          if (char === "\r" && next === "\n") i += 1;
+          row.push(cell);
+          if (row.some((value) => value.trim() !== "")) rows.push(row);
+          row = [];
+          cell = "";
+        } else {
+          cell += char;
+        }
+      }
+      row.push(cell);
+      if (row.some((value) => value.trim() !== "")) rows.push(row);
+      return rows;
+    }
+
+    function parseCsv(text) {
+      const rows = parseCsvRows(text);
+      if (!rows.length) return [];
+      const headers = rows[0].map((header) => header.trim());
+      return rows.slice(1).map((row, index) => {
+        const item = { id: String(index + 1) };
+        headers.forEach((header, colIndex) => { item[header] = row[colIndex] ?? ""; });
+        return item;
+      });
+    }
+
+    function parseDatasetFile(file, text) {
+      const extension = `.${file.name.split(".").pop().toLowerCase()}`;
+      if (extension === ".csv") return parseCsv(text);
+      if (extension === ".json") {
+        const parsed = JSON.parse(text);
+        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed.items)) return parsed.items;
+        if (Array.isArray(parsed.data)) return parsed.data;
+        return [parsed];
+      }
+      if (extension === ".jsonl") {
+        return text.split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line));
+      }
+      if (extension === ".txt") {
+        return text.split(/\r?\n/).filter((line) => line.trim()).map((line, index) => ({ id: String(index + 1), text: line.trim() }));
+      }
+      throw new Error("Unsupported file type. Use .csv, .json, .jsonl or .txt.");
+    }
+
+    function renderPreview() {
+      $("previewMeta").textContent = `${state.items.length} rows loaded. Showing first 20.`;
+      const tbody = $("previewTable").querySelector("tbody");
+      if (!state.items.length) {
+        tbody.innerHTML = `<tr><td colspan="6">No dataset loaded.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = state.items.slice(0, 20).map((item, index) => `
+        <tr>
+          <td>${escapeHtml(item.id ?? index + 1)}</td>
+          <td>${escapeHtml(item.text ?? item.prompt ?? item.input ?? item.content ?? "")}</td>
+          <td>${escapeHtml(item.label ?? "")}</td>
+          <td>${escapeHtml(item.category ?? "")}</td>
+          <td>${escapeHtml(item.source ?? "")}</td>
+          <td>${escapeHtml(item.language ?? "")}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderSummary(response) {
+      const summary = response.summary || {};
+      $("summaryMeta").textContent = summary.has_ground_truth
+        ? "Ground-truth labels found. Metrics are available."
+        : "No labels found. Prediction table is available, metrics are skipped.";
+      $("summaryCards").innerHTML = `
+        <div class="metric"><span>Total prompts</span><strong>${escapeHtml(summary.total_prompts ?? 0)}</strong></div>
+        <div class="metric"><span>Ground truth</span><strong>${summary.has_ground_truth ? "Yes" : "No"}</strong></div>
+        <div class="metric"><span>Models</span><strong>${escapeHtml((response.metadata?.selected_models || []).length)}</strong></div>
+        <div class="metric"><span>Status</span><strong>${escapeHtml(response.status)}</strong></div>
+      `;
+      const tbody = $("metricsTable").querySelector("tbody");
+      const metrics = summary.models || {};
+      if (!summary.has_ground_truth || !Object.keys(metrics).length) {
+        tbody.innerHTML = `<tr><td colspan="10">${escapeHtml(summary.message || "Metrics are not available.")}</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = Object.entries(metrics).map(([model, m]) => `
+        <tr>
+          <td>${escapeHtml(model)}</td>
+          <td>${fmt(m.accuracy)}</td>
+          <td>${fmt(m.precision)}</td>
+          <td>${fmt(m.recall)}</td>
+          <td>${fmt(m.f1)}</td>
+          <td>${escapeHtml(m.tp ?? "")}</td>
+          <td>${escapeHtml(m.fp ?? "")}</td>
+          <td>${escapeHtml(m.tn ?? "")}</td>
+          <td>${escapeHtml(m.fn ?? "")}</td>
+          <td>${fmt(m.avg_latency_ms)}</td>
+        </tr>
+      `).join("");
+    }
+
+    function fmt(value) {
+      return value === null || value === undefined ? "n/a" : Number(value).toFixed(4);
+    }
+
+    function rowHasMismatch(row, modelFilter) {
+      if (row.ground_truth_label === null || row.ground_truth_label === undefined) return false;
+      const entries = Object.entries(row.predictions || {}).filter(([model]) => modelFilter === "all" || model === modelFilter);
+      return entries.some(([, prediction]) => prediction.available && Number(prediction.predicted_label) !== Number(row.ground_truth_label));
+    }
+
+    function rowHasDisagreement(row) {
+      const labels = Object.values(row.predictions || {})
+        .filter((prediction) => prediction.available && prediction.predicted_label !== null && prediction.predicted_label !== undefined)
+        .map((prediction) => Number(prediction.predicted_label));
+      return new Set(labels).size > 1;
+    }
+
+    function rowHasAction(row, action, modelFilter) {
+      if (action === "all") return true;
+      const entries = Object.entries(row.predictions || {}).filter(([model]) => modelFilter === "all" || model === modelFilter);
+      return entries.some(([, prediction]) => prediction.action === action);
+    }
+
+    function renderResults() {
+      const response = state.lastResponse;
+      const table = $("resultsTable");
+      const thead = table.querySelector("thead");
+      const tbody = table.querySelector("tbody");
+      if (!response) {
+        thead.innerHTML = "";
+        tbody.innerHTML = `<tr><td>No results yet.</td></tr>`;
+        return;
+      }
+      const selected = response.metadata?.selected_models || [];
+      const modelFilter = $("modelFilter").value;
+      const visibleModels = modelFilter === "all" ? selected : selected.filter((model) => model === modelFilter);
+      const search = $("searchInput").value.trim().toLowerCase();
+      const actionFilter = $("actionFilter").value;
+      const mismatchFilter = $("mismatchFilter").value;
+      const header = ["ID", "Prompt", "Ground Truth"];
+      visibleModels.forEach((model) => header.push(`${model} Label`, `${model} Risk`, `${model} Action`));
+      thead.innerHTML = `<tr>${header.map((item) => `<th>${escapeHtml(item)}</th>`).join("")}</tr>`;
+
+      const rows = (response.results || []).filter((row) => {
+        if (search && !String(row.text || "").toLowerCase().includes(search)) return false;
+        if (!rowHasAction(row, actionFilter, modelFilter)) return false;
+        if (mismatchFilter === "mismatch" && !rowHasMismatch(row, modelFilter)) return false;
+        if (mismatchFilter === "disagreement" && !rowHasDisagreement(row)) return false;
+        return true;
+      });
+
+      if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="${header.length}">No rows match filters.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = rows.map((row, index) => {
+        const mismatch = rowHasMismatch(row, modelFilter);
+        const disagreement = rowHasDisagreement(row);
+        const rowClass = `${mismatch ? mismatchClass(row, modelFilter) : ""} ${disagreement ? "disagreement" : ""}`;
+        const cells = [escapeHtml(row.id), escapeHtml(row.text), escapeHtml(row.ground_truth_label ?? "")];
+        visibleModels.forEach((model) => {
+          const prediction = row.predictions?.[model] || {};
+          cells.push(
+            escapeHtml(prediction.predicted_label ?? "n/a"),
+            prediction.risk_score === null || prediction.risk_score === undefined ? "n/a" : Number(prediction.risk_score).toFixed(4),
+            `<span class="badge ${escapeHtml(prediction.action || "model_not_ready")}">${escapeHtml(prediction.action || "model_not_ready")}</span>`
+          );
+        });
+        return `<tr class="${rowClass}" data-index="${index}">${cells.map((cell) => `<td>${cell}</td>`).join("")}</tr>`;
+      }).join("");
+
+      Array.from(tbody.querySelectorAll("tr")).forEach((tr, index) => {
+        tr.addEventListener("click", () => {
+          $("rowDetail").textContent = JSON.stringify(rows[index], null, 2);
+        });
+      });
+    }
+
+    function mismatchClass(row, modelFilter) {
+      const entries = Object.entries(row.predictions || {}).filter(([model]) => modelFilter === "all" || model === modelFilter);
+      const fp = entries.some(([, prediction]) => prediction.available && Number(row.ground_truth_label) === 0 && Number(prediction.predicted_label) === 1);
+      const fn = entries.some(([, prediction]) => prediction.available && Number(row.ground_truth_label) === 1 && Number(prediction.predicted_label) === 0);
+      if (fn) return "false-negative";
+      if (fp) return "false-positive";
+      return "";
+    }
+
+    async function validateDataset() {
+      setError("");
+      setStatus("validating", 25);
+      const response = await fetch("/batch/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestPayload()),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail));
+      if (!data.valid) {
+        setStatus("validation failed", 0);
+        setError(data.errors.join("; "));
+      } else {
+        setStatus("validated", 35);
+        setError([`Text column: ${data.text_column_detected || "n/a"}`, `Label column: ${data.label_column_detected || "n/a"}`, `Category column: ${data.category_column_detected || "n/a"}`, ...(data.warnings || [])].join("; "));
+      }
+      return data;
+    }
+
+    async function runBatchEvaluation() {
+      setError("");
+      if (!state.items.length) {
+        setError("Upload a dataset first.");
+        return;
+      }
+      if (!selectedModels().length) {
+        setError("Select at least one model.");
+        return;
+      }
+      state.abortController = new AbortController();
+      $("runButton").disabled = true;
+      $("cancelButton").disabled = false;
+      setStatus("running", 55);
+      try {
+        const response = await fetch("/batch/evaluate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestPayload()),
+          signal: state.abortController.signal,
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail));
+        state.lastResponse = data;
+        setStatus(data.status === "completed" ? "completed" : data.status, data.status === "completed" ? 100 : 0);
+        if (data.validation && !data.validation.valid) setError(data.validation.errors.join("; "));
+        renderSummary(data);
+        updateModelFilter(data.metadata?.selected_models || []);
+        renderResults();
+        enableExports(Boolean(data.exports));
+      } catch (error) {
+        if (error.name === "AbortError") {
+          setStatus("cancelled", 0);
+        } else {
+          setStatus("failed", 0);
+          setError(error.message || "Batch evaluation failed.");
+        }
+      } finally {
+        $("runButton").disabled = false;
+        $("cancelButton").disabled = true;
+        state.abortController = null;
+      }
+    }
+
+    function updateModelFilter(models) {
+      $("modelFilter").innerHTML = `<option value="all">All models</option>` + models.map((model) => `<option value="${escapeHtml(model)}">${escapeHtml(model)}</option>`).join("");
+    }
+
+    function enableExports(enabled) {
+      $("exportCsvButton").disabled = !enabled;
+      $("exportJsonButton").disabled = !enabled;
+      $("exportMdButton").disabled = !enabled;
+    }
+
+    function downloadText(filename, content, mimeType) {
+      const blob = new Blob([content || ""], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    $("fileInput").addEventListener("change", () => {
+      const file = $("fileInput").files[0];
+      if (!file) return;
+      setError("");
+      $("datasetName").value = file.name;
+      setStatus("uploaded", 15);
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          state.items = parseDatasetFile(file, String(reader.result || ""));
+          renderPreview();
+          setStatus("uploaded and parsed", 20);
+        } catch (error) {
+          state.items = [];
+          renderPreview();
+          setStatus("failed", 0);
+          setError(error.message || "Failed to parse dataset.");
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    $("validateButton").addEventListener("click", () => validateDataset().catch((error) => setError(error.message)));
+    $("runButton").addEventListener("click", runBatchEvaluation);
+    $("cancelButton").addEventListener("click", () => state.abortController?.abort());
+    $("exportCsvButton").addEventListener("click", () => downloadText(state.lastResponse.exports.csv_filename, state.lastResponse.exports.csv_content, "text/csv;charset=utf-8"));
+    $("exportJsonButton").addEventListener("click", () => downloadText(state.lastResponse.exports.json_filename, state.lastResponse.exports.json_content, "application/json;charset=utf-8"));
+    $("exportMdButton").addEventListener("click", () => downloadText(state.lastResponse.exports.markdown_filename, state.lastResponse.exports.markdown_content, "text/markdown;charset=utf-8"));
+    ["searchInput", "actionFilter", "modelFilter", "mismatchFilter"].forEach((id) => $(id).addEventListener("input", renderResults));
+  </script>
+</body>
+</html>

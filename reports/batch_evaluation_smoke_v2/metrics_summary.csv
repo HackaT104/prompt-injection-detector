@@ -1,0 +1,4 @@
+model,status,accuracy,precision,recall,f1,tp,fp,tn,fn,avg_latency_ms,available_prompts,unavailable_prompts
+logistic_regression,available,1.0,1.0,1.0,1.0,10,0,10,0,8.239,20,0
+linear_svm,available,1.0,1.0,1.0,1.0,10,0,10,0,5.697,20,0
+random_forest,available,0.9,0.9,0.9,0.9,9,1,9,1,63.6975,20,0

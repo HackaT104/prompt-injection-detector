@@ -1,0 +1,17 @@
+{
+  "weights": {
+    "rule_score": 0.35,
+    "model_score": 0.45,
+    "context_score": 0.2
+  },
+  "thresholds": {
+    "sanitize_or_warn": 0.5,
+    "block": 0.8
+  },
+  "chunking": {
+    "max_chars": 1200,
+    "overlap_chars": 160
+  },
+  "default_model": "roberta",
+  "safe_context_policy": "exclude"
+}

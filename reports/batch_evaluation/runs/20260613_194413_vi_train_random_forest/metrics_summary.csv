@@ -1,0 +1,2 @@
+model,status,accuracy,precision,recall,f1,tp,fp,tn,fn,avg_latency_ms,available_prompts,unavailable_prompts
+random_forest,available,0.522,0.485181,0.980044,0.649046,442,469,80,9,54.62339,1000,0

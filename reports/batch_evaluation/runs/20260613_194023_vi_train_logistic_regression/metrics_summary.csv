@@ -1,0 +1,2 @@
+model,status,accuracy,precision,recall,f1,tp,fp,tn,fn,avg_latency_ms,available_prompts,unavailable_prompts
+logistic_regression,available,0.597,0.528916,0.973392,0.685402,439,391,158,12,1.59909,1000,0

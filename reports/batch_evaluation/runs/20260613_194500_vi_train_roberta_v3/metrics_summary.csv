@@ -1,0 +1,2 @@
+model,status,accuracy,precision,recall,f1,tp,fp,tn,fn,avg_latency_ms,available_prompts,unavailable_prompts
+roberta_v3,available,0.827,0.849246,0.749446,0.796231,338,60,489,113,19.34393,1000,0

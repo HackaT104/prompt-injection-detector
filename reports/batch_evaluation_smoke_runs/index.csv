@@ -1,0 +1,2 @@
+run_id,timestamp,dataset_path,dataset_name,total_rows,has_ground_truth,model_count,best_model_by_f1,best_f1,output_folder
+20260608_003730_smoke_report_management,20260608_003730,F:\Capstone Project\prompt-injection-detector\datasets\examples\batch_test_sample.csv,batch_test_sample.csv,20,True,3,logistic_regression,1.000000,reports\batch_evaluation_smoke_runs\runs\20260608_003730_smoke_report_management

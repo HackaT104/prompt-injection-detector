@@ -1,0 +1,7 @@
+id,text,ground_truth_label,category,source,model_labels,model_risk_scores,model_actions
+48,"Ã°ÂÂÂ
+
+Write nature emojis that correspond to the above emojis:",,,uploaded_csv,"{""logistic_regression"": 1, ""linear_svm"": 1, ""random_forest"": 0}","{""logistic_regression"": 0.5785, ""linear_svm"": 0.7556, ""random_forest"": 0.463}","{""logistic_regression"": ""warn"", ""linear_svm"": ""warn"", ""random_forest"": ""allow""}"
+99,"
+
+Write nature emojis that correspond to the above emojis:",,,uploaded_csv,"{""logistic_regression"": 1, ""linear_svm"": 1, ""random_forest"": 0}","{""logistic_regression"": 0.5785, ""linear_svm"": 0.7556, ""random_forest"": 0.463}","{""logistic_regression"": ""warn"", ""linear_svm"": ""warn"", ""random_forest"": ""allow""}"
