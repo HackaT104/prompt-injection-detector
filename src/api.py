@@ -16,6 +16,7 @@ from src.advanced_detection import (
     simulate_chat_detection,
 )
 from src.batch_evaluation import evaluate_batch_items, validate_batch_items
+from src.detection.pipeline import run_hybrid_detection
 from src.detector import detect_prompt, detect_prompt_with_context, model_files_status
 from src.indirect_pipeline import detect_indirect_content
 from src.model_diagnostics import diagnose_model
@@ -57,8 +58,10 @@ class ContextAwareDetectRequest(BaseModel):
     source_type: str = "raw_text"
     source_name: str = "inline-content"
     model_name: str = "roberta"
+    ml_model_type: str = "logistic_regression"
     safe_context_policy: str = "exclude"
     ensemble_config: dict[str, Any] | None = None
+    use_transformer: bool = True
     use_cuda: bool = True
 
 
@@ -302,16 +305,16 @@ def detect_context(request: DetectContextRequest) -> dict[str, object]:
 
 @app.post("/detect-context-aware")
 def detect_context_aware(request: ContextAwareDetectRequest) -> dict[str, object]:
-    """Analyze raw/HTML/TXT external text and return chunk-level indirect signals."""
+    """Analyze external text with explainable hybrid context-aware detection."""
     try:
-        return detect_indirect_content(
+        return run_hybrid_detection(
+            user_prompt=request.user_task,
             user_task=request.user_task,
             external_content=request.external_content,
-            source_type=request.source_type,
-            source_name=request.source_name,
-            model_name=request.model_name,
-            safe_context_policy=request.safe_context_policy,
-            config_overrides=request.ensemble_config,
+            ml_model_type=request.ml_model_type,
+            transformer_model=request.model_name,
+            use_ml=True,
+            use_transformer=request.use_transformer,
             use_cuda=request.use_cuda,
         )
     except (ValueError, RuntimeError) as exc:

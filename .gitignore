@@ -34,3 +34,5 @@ reports/*.png
 reports/**/*.png
 reports/*.json
 reports/**/*.json
+!reports/threshold_optimization/
+!reports/threshold_optimization/threshold_summary.json
