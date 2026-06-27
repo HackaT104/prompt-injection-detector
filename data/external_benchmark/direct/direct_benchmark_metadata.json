@@ -1,0 +1,154 @@
+{
+  "created_at": "2026-06-27T17:00:36.861416+00:00",
+  "output_dir": "F:\\Capstone Project\\prompt-injection-detector\\data\\external_benchmark\\direct",
+  "columns": [
+    "id",
+    "dataset_name",
+    "text",
+    "label",
+    "attack_type",
+    "language",
+    "source_label"
+  ],
+  "note": "External direct prompt-injection benchmarks only; not training data.",
+  "datasets": {
+    "deepset": {
+      "status": "success",
+      "output_path": "F:\\Capstone Project\\prompt-injection-detector\\data\\external_benchmark\\direct\\deepset_normalized.csv",
+      "hf_name": "deepset/prompt-injections",
+      "hf_config": null,
+      "attempted_configs": [
+        "<default>"
+      ],
+      "loaded_rows": 662,
+      "rows_after_normalization": 662,
+      "skipped_empty_text": 0,
+      "skipped_unknown_label": 0,
+      "skipped_duplicate_text": 0,
+      "text_column": "text",
+      "label_column": "label",
+      "attack_type_column": null,
+      "language_column": null,
+      "label_distribution": {
+        "0": 399,
+        "1": 263
+      },
+      "attack_type_distribution": {
+        "safe": 399,
+        "1": 263
+      },
+      "warnings": []
+    },
+    "neuralchemy": {
+      "status": "success",
+      "output_path": "F:\\Capstone Project\\prompt-injection-detector\\data\\external_benchmark\\direct\\neuralchemy_normalized.csv",
+      "hf_name": "neuralchemy/Prompt-injection-dataset",
+      "hf_config": "full",
+      "attempted_configs": [
+        "full"
+      ],
+      "loaded_rows": 15919,
+      "rows_after_normalization": 9145,
+      "skipped_empty_text": 0,
+      "skipped_unknown_label": 0,
+      "skipped_duplicate_text": 6774,
+      "text_column": "text",
+      "label_column": "label",
+      "attack_type_column": "category",
+      "language_column": null,
+      "label_distribution": {
+        "1": 5670,
+        "0": 3475
+      },
+      "attack_type_distribution": {
+        "safe": 3475,
+        "DIRECT_INJECTION": 2964,
+        "ADVERSARIAL": 854,
+        "JAILBREAK": 614,
+        "ENCODING": 345,
+        "TRAINING_EXTRACTION": 148,
+        "TOKEN_SMUGGLING": 68,
+        "SYSTEM_MANIPULATION": 62,
+        "RAG_POISONING": 56,
+        "AGENT_MANIPULATION": 54,
+        "PERSONA_REPLACEMENT": 51,
+        "INSTRUCTION_OVERRIDE": 49,
+        "CONTEXT_CONFUSION": 41,
+        "PROMPT_INJECTION": 36,
+        "MULTI_TURN": 36,
+        "CONTROL": 35,
+        "OUTPUT_MANIPULATION": 34,
+        "PROMPT_EXTRACTION": 32,
+        "RESPONSE_MANIPULATION": 31,
+        "PAYLOAD_INJECTION": 29,
+        "SYSTEM_EXTRACTION": 27,
+        "MODEL_FINGERPRINTING": 26,
+        "INDIRECT_INJECTION": 17,
+        "CRESCENDO": 15,
+        "ENCODING_OBFUSCATION": 13,
+        "MANY_SHOT": 11,
+        "TOKEN_INJECTION": 7,
+        "CODE_EXECUTION": 6,
+        "PROMPT_LEAK": 6,
+        "CHAIN_OF_THOUGHT": 3
+      },
+      "warnings": []
+    },
+    "rogue_security": {
+      "status": "error",
+      "output_path": "F:\\Capstone Project\\prompt-injection-detector\\data\\external_benchmark\\direct\\rogue_security_normalized.csv",
+      "hf_name": "rogue-security/prompt-injections-benchmark",
+      "hf_config": null,
+      "rows_after_normalization": 0,
+      "label_distribution": {},
+      "error_type": "RuntimeError",
+      "error": "Could not load rogue-security/prompt-injections-benchmark with configs ['<default>']: DatasetNotFoundError: Dataset 'rogue-security/prompt-injections-benchmark' is a gated dataset on the Hub. You must be authenticated to access it."
+    },
+    "cyberec": {
+      "status": "success",
+      "output_path": "F:\\Capstone Project\\prompt-injection-detector\\data\\external_benchmark\\direct\\cyberec_normalized.csv",
+      "hf_name": "cyberec/llm-prompt-injection-attacks",
+      "hf_config": null,
+      "attempted_configs": [
+        "<default>"
+      ],
+      "loaded_rows": 55000,
+      "rows_after_normalization": 54978,
+      "skipped_empty_text": 0,
+      "skipped_unknown_label": 0,
+      "skipped_duplicate_text": 22,
+      "text_column": "text",
+      "label_column": "labels",
+      "attack_type_column": null,
+      "language_column": null,
+      "label_distribution": {
+        "0": 26410,
+        "1": 28568
+      },
+      "attack_type_distribution": {
+        "safe": 26410,
+        "JAILBREAK_INSTRUCTION_OVERRIDE": 26257,
+        "JAILBREAK_ROLE_HIJACK": 2031,
+        "JAILBREAK_DATA_EXFILTRATION": 205,
+        "JAILBREAK_INSTRUCTION_OVERRIDE_ROLE_HIJACK": 38,
+        "JAILBREAK_ROLE_HIJACK_DATA_EXFILTRATION": 21,
+        "JAILBREAK_INSTRUCTION_OVERRIDE_DATA_EXFILTRATION": 16
+      },
+      "warnings": []
+    }
+  },
+  "combined": {
+    "status": "success",
+    "output_path": "F:\\Capstone Project\\prompt-injection-detector\\data\\external_benchmark\\direct\\direct_all_normalized.csv",
+    "rows_after_normalization": 64785,
+    "dataset_distribution": {
+      "cyberec": 54978,
+      "deepset": 662,
+      "neuralchemy": 9145
+    },
+    "label_distribution": {
+      "0": 30284,
+      "1": 34501
+    }
+  }
+}

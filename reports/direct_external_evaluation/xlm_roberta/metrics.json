@@ -1,0 +1,1321 @@
+{
+  "rows": 64785,
+  "accuracy": 0.7085590800339585,
+  "precision": 0.6552560432569975,
+  "recall": 0.9553925973160198,
+  "f1": 0.7773598254819882,
+  "f2": 0.875215073177985,
+  "false_positive_count": 17342,
+  "false_negative_count": 1539,
+  "tn": 12942,
+  "fp": 17342,
+  "fn": 1539,
+  "tp": 32962,
+  "confusion_matrix": [
+    [
+      12942,
+      17342
+    ],
+    [
+      1539,
+      32962
+    ]
+  ],
+  "threshold": 0.09,
+  "warnings": [],
+  "roc_auc": 0.8913873660028139,
+  "pr_auc": 0.9078230299101864,
+  "dataset": "all",
+  "model": "xlm_roberta",
+  "input": "F:\\Capstone Project\\prompt-injection-detector\\data\\external_benchmark\\direct\\direct_all_normalized.csv",
+  "output_dir": "F:\\Capstone Project\\prompt-injection-detector\\reports\\direct_external_evaluation",
+  "evaluation_scope": "all",
+  "threshold_mode": "auto_test_sweep",
+  "threshold_metadata": {
+    "mode": "auto_test_sweep",
+    "threshold": 0.09,
+    "selected_metrics": {
+      "rows": 64785,
+      "accuracy": 0.7085590800339585,
+      "precision": 0.6552560432569975,
+      "recall": 0.9553925973160198,
+      "f1": 0.7773598254819882,
+      "f2": 0.875215073177985,
+      "false_positive_count": 17342,
+      "false_negative_count": 1539,
+      "tn": 12942,
+      "fp": 17342,
+      "fn": 1539,
+      "tp": 32962,
+      "confusion_matrix": [
+        [
+          12942,
+          17342
+        ],
+        [
+          1539,
+          32962
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [],
+      "roc_auc": 0.8913873660028139,
+      "pr_auc": 0.9078230299101864
+    },
+    "candidate_thresholds": "0.01..0.99 step 0.01",
+    "selection_rule": "maximize F2, then recall, precision, fewer false positives, higher threshold",
+    "warning": "This evaluation uses threshold sweeping on the test set and should not be interpreted as strict held-out performance."
+  },
+  "threshold_warning": "This evaluation uses threshold sweeping on the test set and should not be interpreted as strict held-out performance.",
+  "threshold_note": null,
+  "model_path": "F:\\Capstone Project\\prompt-injection-detector\\models\\transformers\\xlm_roberta_v5_vi",
+  "vectorizer_path": null,
+  "runtime_device": "cuda",
+  "calibration_method": null,
+  "dataset_distribution": {
+    "cyberec": 54978,
+    "deepset": 662,
+    "neuralchemy": 9145
+  },
+  "label_distribution": {
+    "0": 30284,
+    "1": 34501
+  },
+  "attack_type_distribution": {
+    "1": 263,
+    "ADVERSARIAL": 854,
+    "AGENT_MANIPULATION": 54,
+    "CHAIN_OF_THOUGHT": 3,
+    "CODE_EXECUTION": 6,
+    "CONTEXT_CONFUSION": 41,
+    "CONTROL": 35,
+    "CRESCENDO": 15,
+    "DIRECT_INJECTION": 2964,
+    "ENCODING": 345,
+    "ENCODING_OBFUSCATION": 13,
+    "INDIRECT_INJECTION": 17,
+    "INSTRUCTION_OVERRIDE": 49,
+    "JAILBREAK": 614,
+    "JAILBREAK_DATA_EXFILTRATION": 205,
+    "JAILBREAK_INSTRUCTION_OVERRIDE": 26257,
+    "JAILBREAK_INSTRUCTION_OVERRIDE_DATA_EXFILTRATION": 16,
+    "JAILBREAK_INSTRUCTION_OVERRIDE_ROLE_HIJACK": 38,
+    "JAILBREAK_ROLE_HIJACK": 2031,
+    "JAILBREAK_ROLE_HIJACK_DATA_EXFILTRATION": 21,
+    "MANY_SHOT": 11,
+    "MODEL_FINGERPRINTING": 26,
+    "MULTI_TURN": 36,
+    "OUTPUT_MANIPULATION": 34,
+    "PAYLOAD_INJECTION": 29,
+    "PERSONA_REPLACEMENT": 51,
+    "PROMPT_EXTRACTION": 32,
+    "PROMPT_INJECTION": 36,
+    "PROMPT_LEAK": 6,
+    "RAG_POISONING": 56,
+    "RESPONSE_MANIPULATION": 31,
+    "SYSTEM_EXTRACTION": 27,
+    "SYSTEM_MANIPULATION": 62,
+    "TOKEN_INJECTION": 7,
+    "TOKEN_SMUGGLING": 68,
+    "TRAINING_EXTRACTION": 148,
+    "safe": 30284
+  },
+  "by_dataset": {
+    "cyberec": {
+      "rows": 54978,
+      "accuracy": 0.7356942777110844,
+      "precision": 0.665730005431061,
+      "recall": 0.9868734248109773,
+      "f1": 0.7950984954242283,
+      "f2": 0.9000389475230014,
+      "false_positive_count": 14156,
+      "false_negative_count": 375,
+      "tn": 12254,
+      "fp": 14156,
+      "fn": 375,
+      "tp": 28193,
+      "confusion_matrix": [
+        [
+          12254,
+          14156
+        ],
+        [
+          375,
+          28193
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [],
+      "roc_auc": 0.9412654294168462,
+      "pr_auc": 0.9438350419419731
+    },
+    "deepset": {
+      "rows": 662,
+      "accuracy": 0.6797583081570997,
+      "precision": 0.5940959409594095,
+      "recall": 0.6121673003802282,
+      "f1": 0.6029962546816479,
+      "f2": 0.6084656084656084,
+      "false_positive_count": 110,
+      "false_negative_count": 102,
+      "tn": 289,
+      "fp": 110,
+      "fn": 102,
+      "tp": 161,
+      "confusion_matrix": [
+        [
+          289,
+          110
+        ],
+        [
+          102,
+          161
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [],
+      "roc_auc": 0.7133994682523801,
+      "pr_auc": 0.676772534889002
+    },
+    "neuralchemy": {
+      "rows": 9145,
+      "accuracy": 0.5475123018042646,
+      "precision": 0.5996876626756897,
+      "recall": 0.8126984126984127,
+      "f1": 0.690130298038041,
+      "f2": 0.7587933078645764,
+      "false_positive_count": 3076,
+      "false_negative_count": 1062,
+      "tn": 399,
+      "fp": 3076,
+      "fn": 1062,
+      "tp": 4608,
+      "confusion_matrix": [
+        [
+          399,
+          3076
+        ],
+        [
+          1062,
+          4608
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [],
+      "roc_auc": 0.5274309821983683,
+      "pr_auc": 0.6740074788566965
+    }
+  },
+  "by_attack_type": {
+    "1": {
+      "rows": 263,
+      "accuracy": 0.6121673003802282,
+      "precision": 1.0,
+      "recall": 0.6121673003802282,
+      "f1": 0.7594339622641509,
+      "f2": 0.6636438582028029,
+      "false_positive_count": 0,
+      "false_negative_count": 102,
+      "tn": 0,
+      "fp": 0,
+      "fn": 102,
+      "tp": 161,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          102,
+          161
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "ADVERSARIAL": {
+      "rows": 854,
+      "accuracy": 0.892271662763466,
+      "precision": 1.0,
+      "recall": 0.892271662763466,
+      "f1": 0.9430693069306931,
+      "f2": 0.9119195787458113,
+      "false_positive_count": 0,
+      "false_negative_count": 92,
+      "tn": 0,
+      "fp": 0,
+      "fn": 92,
+      "tp": 762,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          92,
+          762
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "AGENT_MANIPULATION": {
+      "rows": 54,
+      "accuracy": 0.9074074074074074,
+      "precision": 1.0,
+      "recall": 0.9074074074074074,
+      "f1": 0.9514563106796117,
+      "f2": 0.9245283018867925,
+      "false_positive_count": 0,
+      "false_negative_count": 5,
+      "tn": 0,
+      "fp": 0,
+      "fn": 5,
+      "tp": 49,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          5,
+          49
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "CHAIN_OF_THOUGHT": {
+      "rows": 3,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "f2": 1.0,
+      "false_positive_count": 0,
+      "false_negative_count": 0,
+      "tn": 0,
+      "fp": 0,
+      "fn": 0,
+      "tp": 3,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          3
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "CODE_EXECUTION": {
+      "rows": 6,
+      "accuracy": 0.8333333333333334,
+      "precision": 1.0,
+      "recall": 0.8333333333333334,
+      "f1": 0.9090909090909091,
+      "f2": 0.8620689655172415,
+      "false_positive_count": 0,
+      "false_negative_count": 1,
+      "tn": 0,
+      "fp": 0,
+      "fn": 1,
+      "tp": 5,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          5
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "CONTEXT_CONFUSION": {
+      "rows": 41,
+      "accuracy": 0.7073170731707317,
+      "precision": 1.0,
+      "recall": 0.7073170731707317,
+      "f1": 0.8285714285714285,
+      "f2": 0.7512953367875648,
+      "false_positive_count": 0,
+      "false_negative_count": 12,
+      "tn": 0,
+      "fp": 0,
+      "fn": 12,
+      "tp": 29,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          12,
+          29
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "CONTROL": {
+      "rows": 35,
+      "accuracy": 0.6,
+      "precision": 1.0,
+      "recall": 0.6,
+      "f1": 0.7499999999999999,
+      "f2": 0.6521739130434783,
+      "false_positive_count": 0,
+      "false_negative_count": 14,
+      "tn": 0,
+      "fp": 0,
+      "fn": 14,
+      "tp": 21,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          14,
+          21
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "CRESCENDO": {
+      "rows": 15,
+      "accuracy": 0.9333333333333333,
+      "precision": 1.0,
+      "recall": 0.9333333333333333,
+      "f1": 0.9655172413793104,
+      "f2": 0.9459459459459459,
+      "false_positive_count": 0,
+      "false_negative_count": 1,
+      "tn": 0,
+      "fp": 0,
+      "fn": 1,
+      "tp": 14,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          14
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "DIRECT_INJECTION": {
+      "rows": 2964,
+      "accuracy": 0.7574224021592443,
+      "precision": 1.0,
+      "recall": 0.7574224021592443,
+      "f1": 0.8619696678825111,
+      "f2": 0.7960428338415715,
+      "false_positive_count": 0,
+      "false_negative_count": 719,
+      "tn": 0,
+      "fp": 0,
+      "fn": 719,
+      "tp": 2245,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          719,
+          2245
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "ENCODING": {
+      "rows": 345,
+      "accuracy": 0.855072463768116,
+      "precision": 1.0,
+      "recall": 0.855072463768116,
+      "f1": 0.921875,
+      "f2": 0.8805970149253731,
+      "false_positive_count": 0,
+      "false_negative_count": 50,
+      "tn": 0,
+      "fp": 0,
+      "fn": 50,
+      "tp": 295,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          50,
+          295
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "ENCODING_OBFUSCATION": {
+      "rows": 13,
+      "accuracy": 0.6923076923076923,
+      "precision": 1.0,
+      "recall": 0.6923076923076923,
+      "f1": 0.8181818181818181,
+      "f2": 0.7377049180327869,
+      "false_positive_count": 0,
+      "false_negative_count": 4,
+      "tn": 0,
+      "fp": 0,
+      "fn": 4,
+      "tp": 9,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          4,
+          9
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "INDIRECT_INJECTION": {
+      "rows": 17,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "f2": 1.0,
+      "false_positive_count": 0,
+      "false_negative_count": 0,
+      "tn": 0,
+      "fp": 0,
+      "fn": 0,
+      "tp": 17,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          17
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "INSTRUCTION_OVERRIDE": {
+      "rows": 49,
+      "accuracy": 0.9183673469387755,
+      "precision": 1.0,
+      "recall": 0.9183673469387755,
+      "f1": 0.9574468085106383,
+      "f2": 0.9336099585062242,
+      "false_positive_count": 0,
+      "false_negative_count": 4,
+      "tn": 0,
+      "fp": 0,
+      "fn": 4,
+      "tp": 45,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          4,
+          45
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "JAILBREAK": {
+      "rows": 614,
+      "accuracy": 0.9055374592833876,
+      "precision": 1.0,
+      "recall": 0.9055374592833876,
+      "f1": 0.9504273504273504,
+      "f2": 0.9229747675962815,
+      "false_positive_count": 0,
+      "false_negative_count": 58,
+      "tn": 0,
+      "fp": 0,
+      "fn": 58,
+      "tp": 556,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          58,
+          556
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "JAILBREAK_DATA_EXFILTRATION": {
+      "rows": 205,
+      "accuracy": 0.9951219512195122,
+      "precision": 1.0,
+      "recall": 0.9951219512195122,
+      "f1": 0.9975550122249389,
+      "f2": 0.99609375,
+      "false_positive_count": 0,
+      "false_negative_count": 1,
+      "tn": 0,
+      "fp": 0,
+      "fn": 1,
+      "tp": 204,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          204
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "JAILBREAK_INSTRUCTION_OVERRIDE": {
+      "rows": 26257,
+      "accuracy": 0.9878508588186008,
+      "precision": 1.0,
+      "recall": 0.9878508588186008,
+      "f1": 0.9938883034773446,
+      "f2": 0.9902570132706199,
+      "false_positive_count": 0,
+      "false_negative_count": 319,
+      "tn": 0,
+      "fp": 0,
+      "fn": 319,
+      "tp": 25938,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          319,
+          25938
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "JAILBREAK_INSTRUCTION_OVERRIDE_DATA_EXFILTRATION": {
+      "rows": 16,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "f2": 1.0,
+      "false_positive_count": 0,
+      "false_negative_count": 0,
+      "tn": 0,
+      "fp": 0,
+      "fn": 0,
+      "tp": 16,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          16
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "JAILBREAK_INSTRUCTION_OVERRIDE_ROLE_HIJACK": {
+      "rows": 38,
+      "accuracy": 0.9736842105263158,
+      "precision": 1.0,
+      "recall": 0.9736842105263158,
+      "f1": 0.9866666666666666,
+      "f2": 0.9788359788359787,
+      "false_positive_count": 0,
+      "false_negative_count": 1,
+      "tn": 0,
+      "fp": 0,
+      "fn": 1,
+      "tp": 37,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          37
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "JAILBREAK_ROLE_HIJACK": {
+      "rows": 2031,
+      "accuracy": 0.9734121122599705,
+      "precision": 1.0,
+      "recall": 0.9734121122599705,
+      "f1": 0.9865269461077845,
+      "f2": 0.9786159786159786,
+      "false_positive_count": 0,
+      "false_negative_count": 54,
+      "tn": 0,
+      "fp": 0,
+      "fn": 54,
+      "tp": 1977,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          54,
+          1977
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "JAILBREAK_ROLE_HIJACK_DATA_EXFILTRATION": {
+      "rows": 21,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "f2": 1.0,
+      "false_positive_count": 0,
+      "false_negative_count": 0,
+      "tn": 0,
+      "fp": 0,
+      "fn": 0,
+      "tp": 21,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          21
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "MANY_SHOT": {
+      "rows": 11,
+      "accuracy": 0.7272727272727273,
+      "precision": 1.0,
+      "recall": 0.7272727272727273,
+      "f1": 0.8421052631578948,
+      "f2": 0.7692307692307693,
+      "false_positive_count": 0,
+      "false_negative_count": 3,
+      "tn": 0,
+      "fp": 0,
+      "fn": 3,
+      "tp": 8,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          3,
+          8
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "MODEL_FINGERPRINTING": {
+      "rows": 26,
+      "accuracy": 0.5,
+      "precision": 1.0,
+      "recall": 0.5,
+      "f1": 0.6666666666666666,
+      "f2": 0.5555555555555556,
+      "false_positive_count": 0,
+      "false_negative_count": 13,
+      "tn": 0,
+      "fp": 0,
+      "fn": 13,
+      "tp": 13,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          13,
+          13
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "MULTI_TURN": {
+      "rows": 36,
+      "accuracy": 0.8888888888888888,
+      "precision": 1.0,
+      "recall": 0.8888888888888888,
+      "f1": 0.9411764705882353,
+      "f2": 0.9090909090909091,
+      "false_positive_count": 0,
+      "false_negative_count": 4,
+      "tn": 0,
+      "fp": 0,
+      "fn": 4,
+      "tp": 32,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          4,
+          32
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "OUTPUT_MANIPULATION": {
+      "rows": 34,
+      "accuracy": 0.7941176470588235,
+      "precision": 1.0,
+      "recall": 0.7941176470588235,
+      "f1": 0.8852459016393442,
+      "f2": 0.8282208588957055,
+      "false_positive_count": 0,
+      "false_negative_count": 7,
+      "tn": 0,
+      "fp": 0,
+      "fn": 7,
+      "tp": 27,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          7,
+          27
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "PAYLOAD_INJECTION": {
+      "rows": 29,
+      "accuracy": 0.8275862068965517,
+      "precision": 1.0,
+      "recall": 0.8275862068965517,
+      "f1": 0.9056603773584906,
+      "f2": 0.8571428571428572,
+      "false_positive_count": 0,
+      "false_negative_count": 5,
+      "tn": 0,
+      "fp": 0,
+      "fn": 5,
+      "tp": 24,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          5,
+          24
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "PERSONA_REPLACEMENT": {
+      "rows": 51,
+      "accuracy": 0.9215686274509803,
+      "precision": 1.0,
+      "recall": 0.9215686274509803,
+      "f1": 0.9591836734693878,
+      "f2": 0.9362549800796811,
+      "false_positive_count": 0,
+      "false_negative_count": 4,
+      "tn": 0,
+      "fp": 0,
+      "fn": 4,
+      "tp": 47,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          4,
+          47
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "PROMPT_EXTRACTION": {
+      "rows": 32,
+      "accuracy": 0.84375,
+      "precision": 1.0,
+      "recall": 0.84375,
+      "f1": 0.9152542372881356,
+      "f2": 0.8709677419354839,
+      "false_positive_count": 0,
+      "false_negative_count": 5,
+      "tn": 0,
+      "fp": 0,
+      "fn": 5,
+      "tp": 27,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          5,
+          27
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "PROMPT_INJECTION": {
+      "rows": 36,
+      "accuracy": 0.7777777777777778,
+      "precision": 1.0,
+      "recall": 0.7777777777777778,
+      "f1": 0.8750000000000001,
+      "f2": 0.813953488372093,
+      "false_positive_count": 0,
+      "false_negative_count": 8,
+      "tn": 0,
+      "fp": 0,
+      "fn": 8,
+      "tp": 28,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          8,
+          28
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "PROMPT_LEAK": {
+      "rows": 6,
+      "accuracy": 0.6666666666666666,
+      "precision": 1.0,
+      "recall": 0.6666666666666666,
+      "f1": 0.8,
+      "f2": 0.7142857142857142,
+      "false_positive_count": 0,
+      "false_negative_count": 2,
+      "tn": 0,
+      "fp": 0,
+      "fn": 2,
+      "tp": 4,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          2,
+          4
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "RAG_POISONING": {
+      "rows": 56,
+      "accuracy": 0.9642857142857143,
+      "precision": 1.0,
+      "recall": 0.9642857142857143,
+      "f1": 0.9818181818181818,
+      "f2": 0.9712230215827338,
+      "false_positive_count": 0,
+      "false_negative_count": 2,
+      "tn": 0,
+      "fp": 0,
+      "fn": 2,
+      "tp": 54,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          2,
+          54
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "RESPONSE_MANIPULATION": {
+      "rows": 31,
+      "accuracy": 0.8387096774193549,
+      "precision": 1.0,
+      "recall": 0.8387096774193549,
+      "f1": 0.9122807017543859,
+      "f2": 0.8666666666666666,
+      "false_positive_count": 0,
+      "false_negative_count": 5,
+      "tn": 0,
+      "fp": 0,
+      "fn": 5,
+      "tp": 26,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          5,
+          26
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "SYSTEM_EXTRACTION": {
+      "rows": 27,
+      "accuracy": 0.8888888888888888,
+      "precision": 1.0,
+      "recall": 0.8888888888888888,
+      "f1": 0.9411764705882353,
+      "f2": 0.9090909090909091,
+      "false_positive_count": 0,
+      "false_negative_count": 3,
+      "tn": 0,
+      "fp": 0,
+      "fn": 3,
+      "tp": 24,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          3,
+          24
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "SYSTEM_MANIPULATION": {
+      "rows": 62,
+      "accuracy": 0.9032258064516129,
+      "precision": 1.0,
+      "recall": 0.9032258064516129,
+      "f1": 0.9491525423728813,
+      "f2": 0.9210526315789472,
+      "false_positive_count": 0,
+      "false_negative_count": 6,
+      "tn": 0,
+      "fp": 0,
+      "fn": 6,
+      "tp": 56,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          6,
+          56
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "TOKEN_INJECTION": {
+      "rows": 7,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "f2": 1.0,
+      "false_positive_count": 0,
+      "false_negative_count": 0,
+      "tn": 0,
+      "fp": 0,
+      "fn": 0,
+      "tp": 7,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          7
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "TOKEN_SMUGGLING": {
+      "rows": 68,
+      "accuracy": 0.8676470588235294,
+      "precision": 1.0,
+      "recall": 0.8676470588235294,
+      "f1": 0.9291338582677166,
+      "f2": 0.8912386706948641,
+      "false_positive_count": 0,
+      "false_negative_count": 9,
+      "tn": 0,
+      "fp": 0,
+      "fn": 9,
+      "tp": 59,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          9,
+          59
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "TRAINING_EXTRACTION": {
+      "rows": 148,
+      "accuracy": 0.8243243243243243,
+      "precision": 1.0,
+      "recall": 0.8243243243243243,
+      "f1": 0.9037037037037037,
+      "f2": 0.854341736694678,
+      "false_positive_count": 0,
+      "false_negative_count": 26,
+      "tn": 0,
+      "fp": 0,
+      "fn": 26,
+      "tp": 122,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          26,
+          122
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "safe": {
+      "rows": 30284,
+      "accuracy": 0.42735437854972924,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "f2": 0.0,
+      "false_positive_count": 17342,
+      "false_negative_count": 0,
+      "tn": 12942,
+      "fp": 17342,
+      "fn": 0,
+      "tp": 0,
+      "confusion_matrix": [
+        [
+          12942,
+          17342
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "threshold": 0.09,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    }
+  }
+}

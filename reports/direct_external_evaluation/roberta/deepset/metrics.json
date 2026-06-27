@@ -1,0 +1,178 @@
+{
+  "rows": 662,
+  "accuracy": 0.959214501510574,
+  "precision": 0.9916666666666667,
+  "recall": 0.9049429657794676,
+  "f1": 0.9463220675944334,
+  "f2": 0.9210526315789476,
+  "false_positive_count": 2,
+  "false_negative_count": 25,
+  "tn": 397,
+  "fp": 2,
+  "fn": 25,
+  "tp": 238,
+  "confusion_matrix": [
+    [
+      397,
+      2
+    ],
+    [
+      25,
+      238
+    ]
+  ],
+  "threshold": 0.01,
+  "warnings": [],
+  "roc_auc": 0.9834472111838533,
+  "pr_auc": 0.9844345821559987,
+  "dataset": "deepset",
+  "model": "roberta",
+  "input": "F:\\Capstone Project\\prompt-injection-detector\\data\\external_benchmark\\direct\\deepset_normalized.csv",
+  "output_dir": "F:\\Capstone Project\\prompt-injection-detector\\reports\\direct_external_evaluation",
+  "evaluation_scope": "all",
+  "threshold_mode": "auto_test_sweep",
+  "threshold_metadata": {
+    "mode": "auto_test_sweep",
+    "threshold": 0.01,
+    "selected_metrics": {
+      "rows": 662,
+      "accuracy": 0.959214501510574,
+      "precision": 0.9916666666666667,
+      "recall": 0.9049429657794676,
+      "f1": 0.9463220675944334,
+      "f2": 0.9210526315789476,
+      "false_positive_count": 2,
+      "false_negative_count": 25,
+      "tn": 397,
+      "fp": 2,
+      "fn": 25,
+      "tp": 238,
+      "confusion_matrix": [
+        [
+          397,
+          2
+        ],
+        [
+          25,
+          238
+        ]
+      ],
+      "threshold": 0.01,
+      "warnings": [],
+      "roc_auc": 0.9834472111838533,
+      "pr_auc": 0.9844345821559987
+    },
+    "candidate_thresholds": "0.01..0.99 step 0.01",
+    "selection_rule": "maximize F2, then recall, precision, fewer false positives, higher threshold",
+    "warning": "This evaluation uses threshold sweeping on the test set and should not be interpreted as strict held-out performance."
+  },
+  "threshold_warning": "This evaluation uses threshold sweeping on the test set and should not be interpreted as strict held-out performance.",
+  "threshold_note": null,
+  "model_path": "F:\\Capstone Project\\prompt-injection-detector\\models\\transformers\\roberta_v5_vi",
+  "vectorizer_path": null,
+  "runtime_device": "cuda",
+  "calibration_method": null,
+  "dataset_distribution": {
+    "deepset": 662
+  },
+  "label_distribution": {
+    "0": 399,
+    "1": 263
+  },
+  "attack_type_distribution": {
+    "1": 263,
+    "safe": 399
+  },
+  "by_dataset": {
+    "deepset": {
+      "rows": 662,
+      "accuracy": 0.959214501510574,
+      "precision": 0.9916666666666667,
+      "recall": 0.9049429657794676,
+      "f1": 0.9463220675944334,
+      "f2": 0.9210526315789476,
+      "false_positive_count": 2,
+      "false_negative_count": 25,
+      "tn": 397,
+      "fp": 2,
+      "fn": 25,
+      "tp": 238,
+      "confusion_matrix": [
+        [
+          397,
+          2
+        ],
+        [
+          25,
+          238
+        ]
+      ],
+      "threshold": 0.01,
+      "warnings": [],
+      "roc_auc": 0.9834329168929931,
+      "pr_auc": 0.9844146919459047
+    }
+  },
+  "by_attack_type": {
+    "1": {
+      "rows": 263,
+      "accuracy": 0.9049429657794676,
+      "precision": 1.0,
+      "recall": 0.9049429657794676,
+      "f1": 0.9500998003992016,
+      "f2": 0.9224806201550387,
+      "false_positive_count": 0,
+      "false_negative_count": 25,
+      "tn": 0,
+      "fp": 0,
+      "fn": 25,
+      "tp": 238,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          25,
+          238
+        ]
+      ],
+      "threshold": 0.01,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "safe": {
+      "rows": 399,
+      "accuracy": 0.9949874686716792,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "f2": 0.0,
+      "false_positive_count": 2,
+      "false_negative_count": 0,
+      "tn": 397,
+      "fp": 2,
+      "fn": 0,
+      "tp": 0,
+      "confusion_matrix": [
+        [
+          397,
+          2
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "threshold": 0.01,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    }
+  }
+}

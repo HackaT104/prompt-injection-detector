@@ -43,3 +43,7 @@ reports/**/*.json
 !reports/bipia_evaluation/**/*.json
 !reports/bipia_evaluation/threshold_optimization/
 !reports/bipia_evaluation/threshold_optimization/threshold_summary.json
+!reports/direct_external_evaluation/
+!reports/direct_external_evaluation/*.json
+!reports/direct_external_evaluation/**/
+!reports/direct_external_evaluation/**/*.json

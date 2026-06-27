@@ -1,0 +1,178 @@
+{
+  "rows": 662,
+  "accuracy": 0.8897280966767371,
+  "precision": 0.8006329113924051,
+  "recall": 0.9619771863117871,
+  "f1": 0.8739205526770294,
+  "f2": 0.9247076023391813,
+  "false_positive_count": 63,
+  "false_negative_count": 10,
+  "tn": 336,
+  "fp": 63,
+  "fn": 10,
+  "tp": 253,
+  "confusion_matrix": [
+    [
+      336,
+      63
+    ],
+    [
+      10,
+      253
+    ]
+  ],
+  "threshold": 0.45,
+  "warnings": [],
+  "roc_auc": 0.969667514794591,
+  "pr_auc": 0.9510675856853957,
+  "dataset": "deepset",
+  "model": "logistic_regression",
+  "input": "F:\\Capstone Project\\prompt-injection-detector\\data\\external_benchmark\\direct\\deepset_normalized.csv",
+  "output_dir": "F:\\Capstone Project\\prompt-injection-detector\\reports\\direct_external_evaluation",
+  "evaluation_scope": "all",
+  "threshold_mode": "auto_test_sweep",
+  "threshold_metadata": {
+    "mode": "auto_test_sweep",
+    "threshold": 0.45,
+    "selected_metrics": {
+      "rows": 662,
+      "accuracy": 0.8897280966767371,
+      "precision": 0.8006329113924051,
+      "recall": 0.9619771863117871,
+      "f1": 0.8739205526770294,
+      "f2": 0.9247076023391813,
+      "false_positive_count": 63,
+      "false_negative_count": 10,
+      "tn": 336,
+      "fp": 63,
+      "fn": 10,
+      "tp": 253,
+      "confusion_matrix": [
+        [
+          336,
+          63
+        ],
+        [
+          10,
+          253
+        ]
+      ],
+      "threshold": 0.45,
+      "warnings": [],
+      "roc_auc": 0.969667514794591,
+      "pr_auc": 0.9510675856853957
+    },
+    "candidate_thresholds": "0.01..0.99 step 0.01",
+    "selection_rule": "maximize F2, then recall, precision, fewer false positives, higher threshold",
+    "warning": "This evaluation uses threshold sweeping on the test set and should not be interpreted as strict held-out performance."
+  },
+  "threshold_warning": "This evaluation uses threshold sweeping on the test set and should not be interpreted as strict held-out performance.",
+  "threshold_note": null,
+  "model_path": "F:\\Capstone Project\\prompt-injection-detector\\models\\logistic_regression_model.joblib",
+  "vectorizer_path": "F:\\Capstone Project\\prompt-injection-detector\\models\\logistic_regression_vectorizer.joblib",
+  "runtime_device": "cpu",
+  "calibration_method": null,
+  "dataset_distribution": {
+    "deepset": 662
+  },
+  "label_distribution": {
+    "0": 399,
+    "1": 263
+  },
+  "attack_type_distribution": {
+    "1": 263,
+    "safe": 399
+  },
+  "by_dataset": {
+    "deepset": {
+      "rows": 662,
+      "accuracy": 0.8897280966767371,
+      "precision": 0.8006329113924051,
+      "recall": 0.9619771863117871,
+      "f1": 0.8739205526770294,
+      "f2": 0.9247076023391813,
+      "false_positive_count": 63,
+      "false_negative_count": 10,
+      "tn": 336,
+      "fp": 63,
+      "fn": 10,
+      "tp": 253,
+      "confusion_matrix": [
+        [
+          336,
+          63
+        ],
+        [
+          10,
+          253
+        ]
+      ],
+      "threshold": 0.45,
+      "warnings": [],
+      "roc_auc": 0.969667514794591,
+      "pr_auc": 0.9510675856853957
+    }
+  },
+  "by_attack_type": {
+    "1": {
+      "rows": 263,
+      "accuracy": 0.9619771863117871,
+      "precision": 1.0,
+      "recall": 0.9619771863117871,
+      "f1": 0.9806201550387598,
+      "f2": 0.9693486590038314,
+      "false_positive_count": 0,
+      "false_negative_count": 10,
+      "tn": 0,
+      "fp": 0,
+      "fn": 10,
+      "tp": 253,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          10,
+          253
+        ]
+      ],
+      "threshold": 0.45,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "safe": {
+      "rows": 399,
+      "accuracy": 0.8421052631578947,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "f2": 0.0,
+      "false_positive_count": 63,
+      "false_negative_count": 0,
+      "tn": 336,
+      "fp": 63,
+      "fn": 0,
+      "tp": 0,
+      "confusion_matrix": [
+        [
+          336,
+          63
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "threshold": 0.45,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because only one class is present."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    }
+  }
+}
