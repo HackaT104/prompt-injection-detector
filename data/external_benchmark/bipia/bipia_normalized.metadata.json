@@ -1,0 +1,37 @@
+{
+  "source": "microsoft/BIPIA",
+  "source_url": "https://github.com/microsoft/BIPIA.git",
+  "source_commit": "a004b69",
+  "split": "test",
+  "selected_tasks": [
+    "email",
+    "table",
+    "qa",
+    "abstract"
+  ],
+  "selected_positions": [
+    "end",
+    "start",
+    "middle"
+  ],
+  "output_path": "F:\\Capstone Project\\prompt-injection-detector\\data\\external_benchmark\\bipia\\bipia_normalized.csv",
+  "rows": 1000,
+  "safe_rows": 150,
+  "injection_rows": 850,
+  "source_task_counts": {
+    "email": 322,
+    "table": 678
+  },
+  "difficulty_counts": {
+    "easy": 163,
+    "hard": 325,
+    "medium": 512
+  },
+  "attack_prompt_count": 75,
+  "context_rows_available": 150,
+  "warnings": [
+    "Skipped qa: missing F:\\Capstone Project\\prompt-injection-detector\\data\\external_benchmark\\bipia\\raw\\BIPIA\\benchmark\\qa\\test.jsonl. BIPIA requires users to generate qa/abstract contexts separately.",
+    "Skipped abstract: missing F:\\Capstone Project\\prompt-injection-detector\\data\\external_benchmark\\bipia\\raw\\BIPIA\\benchmark\\abstract\\test.jsonl. BIPIA requires users to generate qa/abstract contexts separately."
+  ],
+  "data_leakage_note": "BIPIA is prepared only under data/external_benchmark/bipia and is not copied into any training dataset by this script."
+}

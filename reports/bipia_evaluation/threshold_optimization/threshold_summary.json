@@ -1,0 +1,79 @@
+{
+  "input": "reports\\bipia_evaluation\\bipia_predictions.csv",
+  "rows": 500,
+  "label_column": "label",
+  "score_column": "final_score",
+  "text_column": "user_task",
+  "beta": 2.0,
+  "best_f1_threshold": {
+    "threshold": 0.74,
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "f2": 1.0,
+    "fbeta": 1.0,
+    "tn": 150,
+    "fp": 0,
+    "fn": 0,
+    "tp": 350,
+    "confusion_matrix": [
+      [
+        150,
+        0
+      ],
+      [
+        0,
+        350
+      ]
+    ]
+  },
+  "best_f2_threshold": {
+    "threshold": 0.74,
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "f2": 1.0,
+    "fbeta": 1.0,
+    "tn": 150,
+    "fp": 0,
+    "fn": 0,
+    "tp": 350,
+    "confusion_matrix": [
+      [
+        150,
+        0
+      ],
+      [
+        0,
+        350
+      ]
+    ]
+  },
+  "recommended_threshold": {
+    "threshold": 0.74,
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "f2": 1.0,
+    "fbeta": 1.0,
+    "tn": 150,
+    "fp": 0,
+    "fn": 0,
+    "tp": 350,
+    "confusion_matrix": [
+      [
+        150,
+        0
+      ],
+      [
+        0,
+        350
+      ]
+    ]
+  },
+  "selection_reason": "Recommended threshold maximizes F2 to reduce false negatives.",
+  "note": "Thresholds are selected from observed metrics, not by assuming 0.5."
+}

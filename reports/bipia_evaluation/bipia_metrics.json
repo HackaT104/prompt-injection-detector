@@ -1,0 +1,247 @@
+{
+  "rows": 500,
+  "accuracy": 0.998,
+  "precision": 0.9971509971509972,
+  "recall": 1.0,
+  "f1": 0.9985734664764622,
+  "f2": 0.9994288977727013,
+  "false_positive_count": 1,
+  "false_negative_count": 0,
+  "tn": 149,
+  "fp": 1,
+  "fn": 0,
+  "tp": 350,
+  "confusion_matrix": [
+    [
+      149,
+      1
+    ],
+    [
+      0,
+      350
+    ]
+  ],
+  "warnings": [],
+  "roc_auc": 1.0,
+  "pr_auc": 1.0,
+  "input": "F:\\Capstone Project\\prompt-injection-detector\\data\\external_benchmark\\bipia\\bipia_normalized.csv",
+  "limit": 500,
+  "use_ml": false,
+  "use_transformer": false,
+  "transformer_model": "roberta",
+  "ml_model_type": "logistic_regression",
+  "source_task_counts": {
+    "email": 173,
+    "table": 327
+  },
+  "difficulty_counts": {
+    "easy": 154,
+    "hard": 140,
+    "medium": 206
+  },
+  "split_threshold": {
+    "validation_rows": 150,
+    "test_rows": 350,
+    "threshold": 0.74,
+    "validation_metrics": {
+      "rows": 150,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "f2": 1.0,
+      "false_positive_count": 0,
+      "false_negative_count": 0,
+      "tn": 45,
+      "fp": 0,
+      "fn": 0,
+      "tp": 105,
+      "confusion_matrix": [
+        [
+          45,
+          0
+        ],
+        [
+          0,
+          105
+        ]
+      ],
+      "warnings": [],
+      "roc_auc": 1.0,
+      "pr_auc": 1.0,
+      "threshold": 0.74
+    },
+    "test_metrics": {
+      "rows": 350,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "f2": 1.0,
+      "false_positive_count": 0,
+      "false_negative_count": 0,
+      "tn": 105,
+      "fp": 0,
+      "fn": 0,
+      "tp": 245,
+      "confusion_matrix": [
+        [
+          105,
+          0
+        ],
+        [
+          0,
+          245
+        ]
+      ],
+      "warnings": [],
+      "roc_auc": 1.0,
+      "pr_auc": 1.0,
+      "threshold": 0.74
+    },
+    "warning": "Threshold tuned on validation split only; test metrics are reported separately."
+  },
+  "by_source_task": {
+    "email": {
+      "rows": 173,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "f2": 1.0,
+      "false_positive_count": 0,
+      "false_negative_count": 0,
+      "tn": 50,
+      "fp": 0,
+      "fn": 0,
+      "tp": 123,
+      "confusion_matrix": [
+        [
+          50,
+          0
+        ],
+        [
+          0,
+          123
+        ]
+      ],
+      "warnings": [],
+      "roc_auc": 1.0,
+      "pr_auc": 1.0
+    },
+    "table": {
+      "rows": 327,
+      "accuracy": 0.9969418960244648,
+      "precision": 0.9956140350877193,
+      "recall": 1.0,
+      "f1": 0.9978021978021978,
+      "f2": 0.9991197183098594,
+      "false_positive_count": 1,
+      "false_negative_count": 0,
+      "tn": 99,
+      "fp": 1,
+      "fn": 0,
+      "tp": 227,
+      "confusion_matrix": [
+        [
+          99,
+          1
+        ],
+        [
+          0,
+          227
+        ]
+      ],
+      "warnings": [],
+      "roc_auc": 1.0,
+      "pr_auc": 1.0
+    }
+  },
+  "by_difficulty": {
+    "easy": {
+      "rows": 154,
+      "accuracy": 0.9935064935064936,
+      "precision": 0.8,
+      "recall": 1.0,
+      "f1": 0.888888888888889,
+      "f2": 0.9523809523809523,
+      "false_positive_count": 1,
+      "false_negative_count": 0,
+      "tn": 149,
+      "fp": 1,
+      "fn": 0,
+      "tp": 4,
+      "confusion_matrix": [
+        [
+          149,
+          1
+        ],
+        [
+          0,
+          4
+        ]
+      ],
+      "warnings": [],
+      "roc_auc": 1.0,
+      "pr_auc": 1.0
+    },
+    "hard": {
+      "rows": 140,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "f2": 1.0,
+      "false_positive_count": 0,
+      "false_negative_count": 0,
+      "tn": 0,
+      "fp": 0,
+      "fn": 0,
+      "tp": 140,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          140
+        ]
+      ],
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because valid scores do not contain both classes."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "medium": {
+      "rows": 206,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "f2": 1.0,
+      "false_positive_count": 0,
+      "false_negative_count": 0,
+      "tn": 0,
+      "fp": 0,
+      "fn": 0,
+      "tp": 206,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          206
+        ]
+      ],
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because valid scores do not contain both classes."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    }
+  }
+}
