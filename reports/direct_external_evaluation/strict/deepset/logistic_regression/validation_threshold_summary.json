@@ -1,0 +1,95 @@
+{
+  "threshold": 0.46,
+  "selected_metrics": {
+    "rows": 199,
+    "accuracy": 0.8894472361809045,
+    "precision": 0.8064516129032258,
+    "recall": 0.9493670886075949,
+    "f1": 0.872093023255814,
+    "f2": 0.9168704156479218,
+    "false_positive_count": 18,
+    "false_negative_count": 4,
+    "tn": 102,
+    "fp": 18,
+    "fn": 4,
+    "tp": 75,
+    "confusion_matrix": [
+      [
+        102,
+        18
+      ],
+      [
+        4,
+        75
+      ]
+    ],
+    "threshold": 0.46,
+    "warnings": [],
+    "roc_auc": 0.9651898734177214,
+    "pr_auc": 0.9453574223819746
+  },
+  "candidate_thresholds": "0.01..0.99 step 0.01",
+  "selection_rule": "maximize F2, then recall, precision, fewer false positives, higher threshold",
+  "validation_metrics": {
+    "rows": 199,
+    "accuracy": 0.8894472361809045,
+    "precision": 0.8064516129032258,
+    "recall": 0.9493670886075949,
+    "f1": 0.872093023255814,
+    "f2": 0.9168704156479218,
+    "false_positive_count": 18,
+    "false_negative_count": 4,
+    "tn": 102,
+    "fp": 18,
+    "fn": 4,
+    "tp": 75,
+    "confusion_matrix": [
+      [
+        102,
+        18
+      ],
+      [
+        4,
+        75
+      ]
+    ],
+    "threshold": 0.46,
+    "warnings": [],
+    "roc_auc": 0.9651898734177214,
+    "pr_auc": 0.9453574223819746
+  },
+  "test_metrics_at_validation_threshold": {
+    "rows": 463,
+    "accuracy": 0.8920086393088553,
+    "precision": 0.8073394495412844,
+    "recall": 0.9565217391304348,
+    "f1": 0.8756218905472638,
+    "f2": 0.9224318658280924,
+    "false_positive_count": 42,
+    "false_negative_count": 8,
+    "tn": 237,
+    "fp": 42,
+    "fn": 8,
+    "tp": 176,
+    "confusion_matrix": [
+      [
+        237,
+        42
+      ],
+      [
+        8,
+        176
+      ]
+    ],
+    "threshold": 0.46,
+    "warnings": [],
+    "roc_auc": 0.9714625214274584,
+    "pr_auc": 0.9531681097161151,
+    "dataset": "deepset",
+    "model": "logistic_regression",
+    "threshold_selected_on": "validation",
+    "validation_rows": 199,
+    "test_rows": 463,
+    "split_strategy": "stratified_by_label"
+  }
+}

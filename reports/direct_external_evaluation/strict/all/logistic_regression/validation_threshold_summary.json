@@ -1,0 +1,95 @@
+{
+  "threshold": 0.16,
+  "selected_metrics": {
+    "rows": 19435,
+    "accuracy": 0.5782351427836377,
+    "precision": 0.5580730431029832,
+    "recall": 0.9995169082125603,
+    "f1": 0.7162391387129158,
+    "f2": 0.8629894722792265,
+    "false_positive_count": 8192,
+    "false_negative_count": 5,
+    "tn": 893,
+    "fp": 8192,
+    "fn": 5,
+    "tp": 10345,
+    "confusion_matrix": [
+      [
+        893,
+        8192
+      ],
+      [
+        5,
+        10345
+      ]
+    ],
+    "threshold": 0.16,
+    "warnings": [],
+    "roc_auc": 0.6275668073136427,
+    "pr_auc": 0.6790450603323778
+  },
+  "candidate_thresholds": "0.01..0.99 step 0.01",
+  "selection_rule": "maximize F2, then recall, precision, fewer false positives, higher threshold",
+  "validation_metrics": {
+    "rows": 19435,
+    "accuracy": 0.5782351427836377,
+    "precision": 0.5580730431029832,
+    "recall": 0.9995169082125603,
+    "f1": 0.7162391387129158,
+    "f2": 0.8629894722792265,
+    "false_positive_count": 8192,
+    "false_negative_count": 5,
+    "tn": 893,
+    "fp": 8192,
+    "fn": 5,
+    "tp": 10345,
+    "confusion_matrix": [
+      [
+        893,
+        8192
+      ],
+      [
+        5,
+        10345
+      ]
+    ],
+    "threshold": 0.16,
+    "warnings": [],
+    "roc_auc": 0.6275668073136427,
+    "pr_auc": 0.6790450603323778
+  },
+  "test_metrics_at_validation_threshold": {
+    "rows": 45350,
+    "accuracy": 0.578412348401323,
+    "precision": 0.5582030165633386,
+    "recall": 0.9991304707879591,
+    "f1": 0.7162469018536932,
+    "f2": 0.8628210996052406,
+    "false_positive_count": 19098,
+    "false_negative_count": 21,
+    "tn": 2101,
+    "fp": 19098,
+    "fn": 21,
+    "tp": 24130,
+    "confusion_matrix": [
+      [
+        2101,
+        19098
+      ],
+      [
+        21,
+        24130
+      ]
+    ],
+    "threshold": 0.16,
+    "warnings": [],
+    "roc_auc": 0.6210700169491385,
+    "pr_auc": 0.6752727457564672,
+    "dataset": "all",
+    "model": "logistic_regression",
+    "threshold_selected_on": "validation",
+    "validation_rows": 19435,
+    "test_rows": 45350,
+    "split_strategy": "stratified_by_dataset_name_and_label"
+  }
+}

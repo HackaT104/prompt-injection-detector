@@ -1,0 +1,95 @@
+{
+  "threshold": 0.01,
+  "selected_metrics": {
+    "rows": 19435,
+    "accuracy": 0.9345510676614356,
+    "precision": 0.9720257903494176,
+    "recall": 0.9030917874396135,
+    "f1": 0.936291695883001,
+    "f2": 0.9160851497569388,
+    "false_positive_count": 269,
+    "false_negative_count": 1003,
+    "tn": 8816,
+    "fp": 269,
+    "fn": 1003,
+    "tp": 9347,
+    "confusion_matrix": [
+      [
+        8816,
+        269
+      ],
+      [
+        1003,
+        9347
+      ]
+    ],
+    "threshold": 0.01,
+    "warnings": [],
+    "roc_auc": 0.9825247860384613,
+    "pr_auc": 0.9871566772805213
+  },
+  "candidate_thresholds": "0.01..0.99 step 0.01",
+  "selection_rule": "maximize F2, then recall, precision, fewer false positives, higher threshold",
+  "validation_metrics": {
+    "rows": 19435,
+    "accuracy": 0.9345510676614356,
+    "precision": 0.9720257903494176,
+    "recall": 0.9030917874396135,
+    "f1": 0.936291695883001,
+    "f2": 0.9160851497569388,
+    "false_positive_count": 269,
+    "false_negative_count": 1003,
+    "tn": 8816,
+    "fp": 269,
+    "fn": 1003,
+    "tp": 9347,
+    "confusion_matrix": [
+      [
+        8816,
+        269
+      ],
+      [
+        1003,
+        9347
+      ]
+    ],
+    "threshold": 0.01,
+    "warnings": [],
+    "roc_auc": 0.9825247860384613,
+    "pr_auc": 0.9871566772805213
+  },
+  "test_metrics_at_validation_threshold": {
+    "rows": 45350,
+    "accuracy": 0.9371334068357222,
+    "precision": 0.9736701654509874,
+    "recall": 0.9064635004761707,
+    "f1": 0.938865658839927,
+    "f2": 0.9191522235657663,
+    "false_positive_count": 592,
+    "false_negative_count": 2259,
+    "tn": 20607,
+    "fp": 592,
+    "fn": 2259,
+    "tp": 21892,
+    "confusion_matrix": [
+      [
+        20607,
+        592
+      ],
+      [
+        2259,
+        21892
+      ]
+    ],
+    "threshold": 0.01,
+    "warnings": [],
+    "roc_auc": 0.9837312140919818,
+    "pr_auc": 0.9880044742542526,
+    "dataset": "all",
+    "model": "roberta",
+    "threshold_selected_on": "validation",
+    "validation_rows": 19435,
+    "test_rows": 45350,
+    "split_strategy": "stratified_by_dataset_name_and_label"
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "threshold": 0.01,
+  "selected_metrics": {
+    "rows": 199,
+    "accuracy": 0.9698492462311558,
+    "precision": 0.9866666666666667,
+    "recall": 0.9367088607594937,
+    "f1": 0.961038961038961,
+    "f2": 0.9462915601023018,
+    "false_positive_count": 1,
+    "false_negative_count": 5,
+    "tn": 119,
+    "fp": 1,
+    "fn": 5,
+    "tp": 74,
+    "confusion_matrix": [
+      [
+        119,
+        1
+      ],
+      [
+        5,
+        74
+      ]
+    ],
+    "threshold": 0.01,
+    "warnings": [],
+    "roc_auc": 0.9940928270042194,
+    "pr_auc": 0.9925118212372842
+  },
+  "candidate_thresholds": "0.01..0.99 step 0.01",
+  "selection_rule": "maximize F2, then recall, precision, fewer false positives, higher threshold",
+  "validation_metrics": {
+    "rows": 199,
+    "accuracy": 0.9698492462311558,
+    "precision": 0.9866666666666667,
+    "recall": 0.9367088607594937,
+    "f1": 0.961038961038961,
+    "f2": 0.9462915601023018,
+    "false_positive_count": 1,
+    "false_negative_count": 5,
+    "tn": 119,
+    "fp": 1,
+    "fn": 5,
+    "tp": 74,
+    "confusion_matrix": [
+      [
+        119,
+        1
+      ],
+      [
+        5,
+        74
+      ]
+    ],
+    "threshold": 0.01,
+    "warnings": [],
+    "roc_auc": 0.9940928270042194,
+    "pr_auc": 0.9925118212372842
+  },
+  "test_metrics_at_validation_threshold": {
+    "rows": 463,
+    "accuracy": 0.9546436285097192,
+    "precision": 0.9939393939393939,
+    "recall": 0.8913043478260869,
+    "f1": 0.9398280802292264,
+    "f2": 0.9100998890122086,
+    "false_positive_count": 1,
+    "false_negative_count": 20,
+    "tn": 278,
+    "fp": 1,
+    "fn": 20,
+    "tp": 164,
+    "confusion_matrix": [
+      [
+        278,
+        1
+      ],
+      [
+        20,
+        164
+      ]
+    ],
+    "threshold": 0.01,
+    "warnings": [],
+    "roc_auc": 0.9786601994701574,
+    "pr_auc": 0.9806605885860221,
+    "dataset": "deepset",
+    "model": "roberta",
+    "threshold_selected_on": "validation",
+    "validation_rows": 199,
+    "test_rows": 463,
+    "split_strategy": "stratified_by_label"
+  }
+}

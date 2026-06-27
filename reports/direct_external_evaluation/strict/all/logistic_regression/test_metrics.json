@@ -1,0 +1,34 @@
+{
+  "rows": 45350,
+  "accuracy": 0.578412348401323,
+  "precision": 0.5582030165633386,
+  "recall": 0.9991304707879591,
+  "f1": 0.7162469018536932,
+  "f2": 0.8628210996052406,
+  "false_positive_count": 19098,
+  "false_negative_count": 21,
+  "tn": 2101,
+  "fp": 19098,
+  "fn": 21,
+  "tp": 24130,
+  "confusion_matrix": [
+    [
+      2101,
+      19098
+    ],
+    [
+      21,
+      24130
+    ]
+  ],
+  "threshold": 0.16,
+  "warnings": [],
+  "roc_auc": 0.6210700169491385,
+  "pr_auc": 0.6752727457564672,
+  "dataset": "all",
+  "model": "logistic_regression",
+  "threshold_selected_on": "validation",
+  "validation_rows": 19435,
+  "test_rows": 45350,
+  "split_strategy": "stratified_by_dataset_name_and_label"
+}

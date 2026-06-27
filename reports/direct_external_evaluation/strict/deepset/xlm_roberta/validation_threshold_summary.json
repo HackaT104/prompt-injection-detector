@@ -1,0 +1,95 @@
+{
+  "threshold": 0.01,
+  "selected_metrics": {
+    "rows": 199,
+    "accuracy": 0.4371859296482412,
+    "precision": 0.4057142857142857,
+    "recall": 0.8987341772151899,
+    "f1": 0.5590551181102362,
+    "f2": 0.7230142566191446,
+    "false_positive_count": 104,
+    "false_negative_count": 8,
+    "tn": 16,
+    "fp": 104,
+    "fn": 8,
+    "tp": 71,
+    "confusion_matrix": [
+      [
+        16,
+        104
+      ],
+      [
+        8,
+        71
+      ]
+    ],
+    "threshold": 0.01,
+    "warnings": [],
+    "roc_auc": 0.7063291139240506,
+    "pr_auc": 0.6763745716632263
+  },
+  "candidate_thresholds": "0.01..0.99 step 0.01",
+  "selection_rule": "maximize F2, then recall, precision, fewer false positives, higher threshold",
+  "validation_metrics": {
+    "rows": 199,
+    "accuracy": 0.4371859296482412,
+    "precision": 0.4057142857142857,
+    "recall": 0.8987341772151899,
+    "f1": 0.5590551181102362,
+    "f2": 0.7230142566191446,
+    "false_positive_count": 104,
+    "false_negative_count": 8,
+    "tn": 16,
+    "fp": 104,
+    "fn": 8,
+    "tp": 71,
+    "confusion_matrix": [
+      [
+        16,
+        104
+      ],
+      [
+        8,
+        71
+      ]
+    ],
+    "threshold": 0.01,
+    "warnings": [],
+    "roc_auc": 0.7063291139240506,
+    "pr_auc": 0.6763745716632263
+  },
+  "test_metrics_at_validation_threshold": {
+    "rows": 463,
+    "accuracy": 0.48812095032397407,
+    "precision": 0.43256997455470736,
+    "recall": 0.9239130434782609,
+    "f1": 0.5892547660311958,
+    "f2": 0.7528786536758192,
+    "false_positive_count": 223,
+    "false_negative_count": 14,
+    "tn": 56,
+    "fp": 223,
+    "fn": 14,
+    "tp": 170,
+    "confusion_matrix": [
+      [
+        56,
+        223
+      ],
+      [
+        14,
+        170
+      ]
+    ],
+    "threshold": 0.01,
+    "warnings": [],
+    "roc_auc": 0.7187548698768895,
+    "pr_auc": 0.6808045791815895,
+    "dataset": "deepset",
+    "model": "xlm_roberta",
+    "threshold_selected_on": "validation",
+    "validation_rows": 199,
+    "test_rows": 463,
+    "split_strategy": "stratified_by_label"
+  }
+}

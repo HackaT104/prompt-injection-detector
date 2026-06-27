@@ -1,0 +1,34 @@
+{
+  "rows": 463,
+  "accuracy": 0.9676025917926566,
+  "precision": 0.9518716577540107,
+  "recall": 0.967391304347826,
+  "f1": 0.9595687331536389,
+  "f2": 0.9642470205850487,
+  "false_positive_count": 9,
+  "false_negative_count": 6,
+  "tn": 270,
+  "fp": 9,
+  "fn": 6,
+  "tp": 178,
+  "confusion_matrix": [
+    [
+      270,
+      9
+    ],
+    [
+      6,
+      178
+    ]
+  ],
+  "threshold": 0.57,
+  "warnings": [],
+  "roc_auc": 0.9908835904628331,
+  "pr_auc": 0.9865876139779364,
+  "dataset": "deepset",
+  "model": "random_forest",
+  "threshold_selected_on": "validation",
+  "validation_rows": 199,
+  "test_rows": 463,
+  "split_strategy": "stratified_by_label"
+}

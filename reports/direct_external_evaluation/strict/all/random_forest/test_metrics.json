@@ -1,0 +1,34 @@
+{
+  "rows": 45350,
+  "accuracy": 0.5839691289966924,
+  "precision": 0.5614704513727315,
+  "recall": 0.9992132830938677,
+  "f1": 0.7189524958662914,
+  "f2": 0.8644257221458047,
+  "false_positive_count": 18848,
+  "false_negative_count": 19,
+  "tn": 2351,
+  "fp": 18848,
+  "fn": 19,
+  "tp": 24132,
+  "confusion_matrix": [
+    [
+      2351,
+      18848
+    ],
+    [
+      19,
+      24132
+    ]
+  ],
+  "threshold": 0.1,
+  "warnings": [],
+  "roc_auc": 0.6451951218227363,
+  "pr_auc": 0.691147347775028,
+  "dataset": "all",
+  "model": "random_forest",
+  "threshold_selected_on": "validation",
+  "validation_rows": 19435,
+  "test_rows": 45350,
+  "split_strategy": "stratified_by_dataset_name_and_label"
+}

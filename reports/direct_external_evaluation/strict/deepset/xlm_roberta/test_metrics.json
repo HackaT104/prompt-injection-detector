@@ -1,0 +1,34 @@
+{
+  "rows": 463,
+  "accuracy": 0.48812095032397407,
+  "precision": 0.43256997455470736,
+  "recall": 0.9239130434782609,
+  "f1": 0.5892547660311958,
+  "f2": 0.7528786536758192,
+  "false_positive_count": 223,
+  "false_negative_count": 14,
+  "tn": 56,
+  "fp": 223,
+  "fn": 14,
+  "tp": 170,
+  "confusion_matrix": [
+    [
+      56,
+      223
+    ],
+    [
+      14,
+      170
+    ]
+  ],
+  "threshold": 0.01,
+  "warnings": [],
+  "roc_auc": 0.7187548698768895,
+  "pr_auc": 0.6808045791815895,
+  "dataset": "deepset",
+  "model": "xlm_roberta",
+  "threshold_selected_on": "validation",
+  "validation_rows": 199,
+  "test_rows": 463,
+  "split_strategy": "stratified_by_label"
+}
