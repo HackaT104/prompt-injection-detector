@@ -1,0 +1,90 @@
+{
+  "input": "F:\\Capstone Project\\prompt-injection-detector\\data\\external_benchmark\\bipia\\bipia_normalized.csv",
+  "output_dir": "F:\\Capstone Project\\prompt-injection-detector\\reports\\bipia_evaluation",
+  "rows": 1000,
+  "configs": [
+    "random_forest",
+    "roberta",
+    "xlm_roberta",
+    "roberta_context",
+    "xlm_roberta_context"
+  ],
+  "comparison": [
+    {
+      "Model": "Random Forest",
+      "Context-aware": "No",
+      "Accuracy": "0.8500",
+      "Precision": "0.8500",
+      "Recall": "1.0000",
+      "F1": "0.9189",
+      "F2": "0.9659",
+      "ROC-AUC": "0.4885",
+      "PR-AUC": "0.8414",
+      "FP": 150,
+      "FN": 0,
+      "Threshold": "0.2700",
+      "Rows": 1000
+    },
+    {
+      "Model": "RoBERTa",
+      "Context-aware": "No",
+      "Accuracy": "0.2740",
+      "Precision": "0.8827",
+      "Recall": "0.1682",
+      "F1": "0.2826",
+      "F2": "0.2007",
+      "ROC-AUC": "0.5247",
+      "PR-AUC": "0.8680",
+      "FP": 19,
+      "FN": 707,
+      "Threshold": "0.0100",
+      "Rows": 1000
+    },
+    {
+      "Model": "XLM-RoBERTa",
+      "Context-aware": "No",
+      "Accuracy": "0.6560",
+      "Precision": "0.8514",
+      "Recall": "0.7212",
+      "F1": "0.7809",
+      "F2": "0.7439",
+      "ROC-AUC": "0.5034",
+      "PR-AUC": "0.8554",
+      "FP": 107,
+      "FN": 237,
+      "Threshold": "0.0100",
+      "Rows": 1000
+    },
+    {
+      "Model": "RoBERTa",
+      "Context-aware": "Yes",
+      "Accuracy": "0.9830",
+      "Precision": "0.9804",
+      "Recall": "1.0000",
+      "F1": "0.9901",
+      "F2": "0.9960",
+      "ROC-AUC": "0.8973",
+      "PR-AUC": "0.9669",
+      "FP": 17,
+      "FN": 0,
+      "Threshold": "0.7400",
+      "Rows": 1000
+    },
+    {
+      "Model": "XLM-RoBERTa",
+      "Context-aware": "Yes",
+      "Accuracy": "0.9990",
+      "Precision": "0.9988",
+      "Recall": "1.0000",
+      "F1": "0.9994",
+      "F2": "0.9998",
+      "ROC-AUC": "0.9977",
+      "PR-AUC": "0.9996",
+      "FP": 1,
+      "FN": 0,
+      "Threshold": "0.7400",
+      "Rows": 1000
+    }
+  ],
+  "common_failures": 19
+}

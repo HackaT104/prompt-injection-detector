@@ -1,0 +1,286 @@
+{
+  "rows": 1000,
+  "accuracy": 0.656,
+  "precision": 0.8513888888888889,
+  "recall": 0.7211764705882353,
+  "f1": 0.780891719745223,
+  "f2": 0.7439320388349515,
+  "false_positive_count": 107,
+  "false_negative_count": 237,
+  "tn": 43,
+  "fp": 107,
+  "fn": 237,
+  "tp": 613,
+  "confusion_matrix": [
+    [
+      43,
+      107
+    ],
+    [
+      237,
+      613
+    ]
+  ],
+  "threshold": 0.01,
+  "warnings": [],
+  "roc_auc": 0.5033803921568627,
+  "pr_auc": 0.8553566830177621,
+  "config": "xlm_roberta",
+  "model": "XLM-RoBERTa",
+  "context_aware": false,
+  "input": "F:\\Capstone Project\\prompt-injection-detector\\data\\external_benchmark\\bipia\\bipia_normalized.csv",
+  "limit": 1000,
+  "model_path": "F:\\Capstone Project\\prompt-injection-detector\\models\\transformers\\xlm_roberta_v5_vi",
+  "vectorizer_path": null,
+  "runtime_device": "cuda",
+  "calibration_method": null,
+  "threshold_optimization": {
+    "beta": 2.0,
+    "candidate_thresholds": "0.01..0.99 step 0.01",
+    "selection_rule": "maximize F2, then recall, precision, fewer false positives, higher threshold",
+    "best_f1_threshold": {
+      "rows": 1000,
+      "accuracy": 0.656,
+      "precision": 0.8513888888888889,
+      "recall": 0.7211764705882353,
+      "f1": 0.780891719745223,
+      "f2": 0.7439320388349515,
+      "false_positive_count": 107,
+      "false_negative_count": 237,
+      "tn": 43,
+      "fp": 107,
+      "fn": 237,
+      "tp": 613,
+      "confusion_matrix": [
+        [
+          43,
+          107
+        ],
+        [
+          237,
+          613
+        ]
+      ],
+      "threshold": 0.01,
+      "warnings": [],
+      "roc_auc": 0.5033803921568627,
+      "pr_auc": 0.8553566830177621,
+      "fbeta": 0.7439320388349515
+    },
+    "best_f2_threshold": {
+      "rows": 1000,
+      "accuracy": 0.656,
+      "precision": 0.8513888888888889,
+      "recall": 0.7211764705882353,
+      "f1": 0.780891719745223,
+      "f2": 0.7439320388349515,
+      "false_positive_count": 107,
+      "false_negative_count": 237,
+      "tn": 43,
+      "fp": 107,
+      "fn": 237,
+      "tp": 613,
+      "confusion_matrix": [
+        [
+          43,
+          107
+        ],
+        [
+          237,
+          613
+        ]
+      ],
+      "threshold": 0.01,
+      "warnings": [],
+      "roc_auc": 0.5033803921568627,
+      "pr_auc": 0.8553566830177621,
+      "fbeta": 0.7439320388349515
+    },
+    "recommended_threshold": {
+      "rows": 1000,
+      "accuracy": 0.656,
+      "precision": 0.8513888888888889,
+      "recall": 0.7211764705882353,
+      "f1": 0.780891719745223,
+      "f2": 0.7439320388349515,
+      "false_positive_count": 107,
+      "false_negative_count": 237,
+      "tn": 43,
+      "fp": 107,
+      "fn": 237,
+      "tp": 613,
+      "confusion_matrix": [
+        [
+          43,
+          107
+        ],
+        [
+          237,
+          613
+        ]
+      ],
+      "threshold": 0.01,
+      "warnings": [],
+      "roc_auc": 0.5033803921568627,
+      "pr_auc": 0.8553566830177621,
+      "fbeta": 0.7439320388349515
+    }
+  },
+  "source_task_counts": {
+    "email": 322,
+    "table": 678
+  },
+  "difficulty_counts": {
+    "easy": 163,
+    "hard": 325,
+    "medium": 512
+  },
+  "by_source_task": {
+    "email": {
+      "rows": 322,
+      "accuracy": 0.84472049689441,
+      "precision": 0.84472049689441,
+      "recall": 1.0,
+      "f1": 0.9158249158249159,
+      "f2": 0.9645390070921985,
+      "false_positive_count": 50,
+      "false_negative_count": 0,
+      "tn": 0,
+      "fp": 50,
+      "fn": 0,
+      "tp": 272,
+      "confusion_matrix": [
+        [
+          0,
+          50
+        ],
+        [
+          0,
+          272
+        ]
+      ],
+      "threshold": 0.01,
+      "warnings": [],
+      "roc_auc": 0.5224632352941175,
+      "pr_auc": 0.8621185954466162
+    },
+    "table": {
+      "rows": 678,
+      "accuracy": 0.5663716814159292,
+      "precision": 0.8567839195979899,
+      "recall": 0.5899653979238755,
+      "f1": 0.6987704918032788,
+      "f2": 0.6291512915129152,
+      "false_positive_count": 57,
+      "false_negative_count": 237,
+      "tn": 43,
+      "fp": 57,
+      "fn": 237,
+      "tp": 341,
+      "confusion_matrix": [
+        [
+          43,
+          57
+        ],
+        [
+          237,
+          341
+        ]
+      ],
+      "threshold": 0.01,
+      "warnings": [],
+      "roc_auc": 0.5119982698961938,
+      "pr_auc": 0.8606524175910412
+    }
+  },
+  "by_difficulty": {
+    "easy": {
+      "rows": 163,
+      "accuracy": 0.31901840490797545,
+      "precision": 0.07758620689655173,
+      "recall": 0.6923076923076923,
+      "f1": 0.13953488372093023,
+      "f2": 0.26785714285714285,
+      "false_positive_count": 107,
+      "false_negative_count": 4,
+      "tn": 43,
+      "fp": 107,
+      "fn": 4,
+      "tp": 9,
+      "confusion_matrix": [
+        [
+          43,
+          107
+        ],
+        [
+          4,
+          9
+        ]
+      ],
+      "threshold": 0.01,
+      "warnings": [],
+      "roc_auc": 0.6200000000000001,
+      "pr_auc": 0.25847261383873643
+    },
+    "hard": {
+      "rows": 325,
+      "accuracy": 0.7261538461538461,
+      "precision": 1.0,
+      "recall": 0.7261538461538461,
+      "f1": 0.8413547237076648,
+      "f2": 0.7682291666666667,
+      "false_positive_count": 0,
+      "false_negative_count": 89,
+      "tn": 0,
+      "fp": 0,
+      "fn": 89,
+      "tp": 236,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          89,
+          236
+        ]
+      ],
+      "threshold": 0.01,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because valid scores do not contain both classes."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "medium": {
+      "rows": 512,
+      "accuracy": 0.71875,
+      "precision": 1.0,
+      "recall": 0.71875,
+      "f1": 0.8363636363636363,
+      "f2": 0.7615894039735099,
+      "false_positive_count": 0,
+      "false_negative_count": 144,
+      "tn": 0,
+      "fp": 0,
+      "fn": 144,
+      "tp": 368,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          144,
+          368
+        ]
+      ],
+      "threshold": 0.01,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because valid scores do not contain both classes."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    }
+  }
+}

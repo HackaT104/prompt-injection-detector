@@ -1,0 +1,286 @@
+{
+  "rows": 1000,
+  "accuracy": 0.999,
+  "precision": 0.9988249118683902,
+  "recall": 1.0,
+  "f1": 0.9994121105232218,
+  "f2": 0.9997647612326512,
+  "false_positive_count": 1,
+  "false_negative_count": 0,
+  "tn": 149,
+  "fp": 1,
+  "fn": 0,
+  "tp": 850,
+  "confusion_matrix": [
+    [
+      149,
+      1
+    ],
+    [
+      0,
+      850
+    ]
+  ],
+  "threshold": 0.74,
+  "warnings": [],
+  "roc_auc": 0.9976549019607843,
+  "pr_auc": 0.9995679119001376,
+  "config": "xlm_roberta_context",
+  "model": "XLM-RoBERTa",
+  "context_aware": true,
+  "input": "F:\\Capstone Project\\prompt-injection-detector\\data\\external_benchmark\\bipia\\bipia_normalized.csv",
+  "limit": 1000,
+  "model_path": "F:\\Capstone Project\\prompt-injection-detector\\models\\transformers\\xlm_roberta_v5_vi",
+  "vectorizer_path": null,
+  "runtime_device": "cuda",
+  "calibration_method": null,
+  "threshold_optimization": {
+    "beta": 2.0,
+    "candidate_thresholds": "0.01..0.99 step 0.01",
+    "selection_rule": "maximize F2, then recall, precision, fewer false positives, higher threshold",
+    "best_f1_threshold": {
+      "rows": 1000,
+      "accuracy": 0.999,
+      "precision": 0.9988249118683902,
+      "recall": 1.0,
+      "f1": 0.9994121105232218,
+      "f2": 0.9997647612326512,
+      "false_positive_count": 1,
+      "false_negative_count": 0,
+      "tn": 149,
+      "fp": 1,
+      "fn": 0,
+      "tp": 850,
+      "confusion_matrix": [
+        [
+          149,
+          1
+        ],
+        [
+          0,
+          850
+        ]
+      ],
+      "threshold": 0.74,
+      "warnings": [],
+      "roc_auc": 0.9976549019607843,
+      "pr_auc": 0.9995679119001376,
+      "fbeta": 0.9997647612326512
+    },
+    "best_f2_threshold": {
+      "rows": 1000,
+      "accuracy": 0.999,
+      "precision": 0.9988249118683902,
+      "recall": 1.0,
+      "f1": 0.9994121105232218,
+      "f2": 0.9997647612326512,
+      "false_positive_count": 1,
+      "false_negative_count": 0,
+      "tn": 149,
+      "fp": 1,
+      "fn": 0,
+      "tp": 850,
+      "confusion_matrix": [
+        [
+          149,
+          1
+        ],
+        [
+          0,
+          850
+        ]
+      ],
+      "threshold": 0.74,
+      "warnings": [],
+      "roc_auc": 0.9976549019607843,
+      "pr_auc": 0.9995679119001376,
+      "fbeta": 0.9997647612326512
+    },
+    "recommended_threshold": {
+      "rows": 1000,
+      "accuracy": 0.999,
+      "precision": 0.9988249118683902,
+      "recall": 1.0,
+      "f1": 0.9994121105232218,
+      "f2": 0.9997647612326512,
+      "false_positive_count": 1,
+      "false_negative_count": 0,
+      "tn": 149,
+      "fp": 1,
+      "fn": 0,
+      "tp": 850,
+      "confusion_matrix": [
+        [
+          149,
+          1
+        ],
+        [
+          0,
+          850
+        ]
+      ],
+      "threshold": 0.74,
+      "warnings": [],
+      "roc_auc": 0.9976549019607843,
+      "pr_auc": 0.9995679119001376,
+      "fbeta": 0.9997647612326512
+    }
+  },
+  "source_task_counts": {
+    "email": 322,
+    "table": 678
+  },
+  "difficulty_counts": {
+    "easy": 163,
+    "hard": 325,
+    "medium": 512
+  },
+  "by_source_task": {
+    "email": {
+      "rows": 322,
+      "accuracy": 0.9968944099378882,
+      "precision": 0.9963369963369964,
+      "recall": 1.0,
+      "f1": 0.998165137614679,
+      "f2": 0.9992652461425422,
+      "false_positive_count": 1,
+      "false_negative_count": 0,
+      "tn": 49,
+      "fp": 1,
+      "fn": 0,
+      "tp": 272,
+      "confusion_matrix": [
+        [
+          49,
+          1
+        ],
+        [
+          0,
+          272
+        ]
+      ],
+      "threshold": 0.74,
+      "warnings": [],
+      "roc_auc": 0.9928676470588235,
+      "pr_auc": 0.9985613259836321
+    },
+    "table": {
+      "rows": 678,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "f2": 1.0,
+      "false_positive_count": 0,
+      "false_negative_count": 0,
+      "tn": 100,
+      "fp": 0,
+      "fn": 0,
+      "tp": 578,
+      "confusion_matrix": [
+        [
+          100,
+          0
+        ],
+        [
+          0,
+          578
+        ]
+      ],
+      "threshold": 0.74,
+      "warnings": [],
+      "roc_auc": 1.0,
+      "pr_auc": 1.0
+    }
+  },
+  "by_difficulty": {
+    "easy": {
+      "rows": 163,
+      "accuracy": 0.9938650306748467,
+      "precision": 0.9285714285714286,
+      "recall": 1.0,
+      "f1": 0.962962962962963,
+      "f2": 0.9848484848484849,
+      "false_positive_count": 1,
+      "false_negative_count": 0,
+      "tn": 149,
+      "fp": 1,
+      "fn": 0,
+      "tp": 13,
+      "confusion_matrix": [
+        [
+          149,
+          1
+        ],
+        [
+          0,
+          13
+        ]
+      ],
+      "threshold": 0.74,
+      "warnings": [],
+      "roc_auc": 0.9938461538461538,
+      "pr_auc": 0.8941391941391941
+    },
+    "hard": {
+      "rows": 325,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "f2": 1.0,
+      "false_positive_count": 0,
+      "false_negative_count": 0,
+      "tn": 0,
+      "fp": 0,
+      "fn": 0,
+      "tp": 325,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          325
+        ]
+      ],
+      "threshold": 0.74,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because valid scores do not contain both classes."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    },
+    "medium": {
+      "rows": 512,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "f2": 1.0,
+      "false_positive_count": 0,
+      "false_negative_count": 0,
+      "tn": 0,
+      "fp": 0,
+      "fn": 0,
+      "tp": 512,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          512
+        ]
+      ],
+      "threshold": 0.74,
+      "warnings": [
+        "ROC-AUC/PR-AUC not computed because valid scores do not contain both classes."
+      ],
+      "roc_auc": null,
+      "pr_auc": null
+    }
+  }
+}

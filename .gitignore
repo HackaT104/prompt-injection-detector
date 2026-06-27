@@ -39,5 +39,7 @@ reports/**/*.json
 !reports/threshold_optimization/threshold_summary.json
 !reports/bipia_evaluation/
 !reports/bipia_evaluation/*.json
+!reports/bipia_evaluation/**/
+!reports/bipia_evaluation/**/*.json
 !reports/bipia_evaluation/threshold_optimization/
 !reports/bipia_evaluation/threshold_optimization/threshold_summary.json
