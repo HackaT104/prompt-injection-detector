@@ -1,0 +1,55 @@
+{
+  "fine_tuned": true,
+  "model_name": "roberta_v5_vi",
+  "model_alias": "roberta_v5_vi",
+  "base_model": "roberta-base",
+  "parent_checkpoint": "F:\\Capstone Project\\prompt-injection-detector\\models\\transformers\\roberta_v4",
+  "continued_from_v4": true,
+  "resume_checkpoint": "F:\\Capstone Project\\prompt-injection-detector\\outputs\\transformer_v5_runs\\roberta_v5_vi\\checkpoint-1462",
+  "dataset_name": "v4_replay_80pct_plus_vi_20pct",
+  "dataset_path": "F:\\Capstone Project\\prompt-injection-detector\\datasets\\processed\\transformer_v5_replay_train.csv",
+  "validation_path": "F:\\Capstone Project\\prompt-injection-detector\\datasets\\processed\\vi_validation_processed.csv",
+  "test_path": "F:\\Capstone Project\\prompt-injection-detector\\datasets\\processed\\vi_test_processed.csv",
+  "trained_at": "2026-06-19T20:20:28.996284+00:00",
+  "epochs": 3.0,
+  "label_mapping": {
+    "0": "SAFE",
+    "1": "INJECTION"
+  },
+  "training_mode": "continued_full_finetune",
+  "freeze_encoder": false,
+  "trainable_config": {
+    "freeze_encoder": false,
+    "total_parameters": 124647170,
+    "trainable_parameters": 124647170,
+    "trainable_ratio": 1.0,
+    "encoder_parameters": 124055040,
+    "encoder_trainable_parameters": 124055040
+  },
+  "train_rows": 23400,
+  "validation_rows": 520,
+  "test_rows": 1500,
+  "thresholds": {
+    "evaluation_threshold": 0.01,
+    "runtime_warn_threshold": 0.3,
+    "runtime_block_threshold": 0.45
+  },
+  "metrics": {
+    "accuracy": 0.9933333333333333,
+    "precision": 0.9926686217008798,
+    "recall": 0.9926686217008798,
+    "f1": 0.9926686217008798,
+    "f2": 0.9926686217008798,
+    "roc_auc": 0.999658526267486,
+    "average_precision": 0.9995807879762442,
+    "tn": 813,
+    "fp": 5,
+    "fn": 5,
+    "tp": 677,
+    "threshold": 0.01,
+    "rows": 1500,
+    "prediction_time_seconds": 14.383060400000431,
+    "avg_latency_ms": 9.58870693333362
+  },
+  "created_by": "src.train_transformers_continue"
+}

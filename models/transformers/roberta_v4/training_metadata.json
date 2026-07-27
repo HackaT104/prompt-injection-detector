@@ -1,0 +1,86 @@
+{
+  "fine_tuned": true,
+  "model_name": "roberta",
+  "model_alias": "roberta_v4",
+  "base_model": "roberta-base",
+  "dataset_name": "neuralchemy/Prompt-injection-dataset",
+  "dataset_config": "full",
+  "dataset_source": "datasets\\processed\\hf_prompt_injection_transformer_ready.csv",
+  "dataset_path": "datasets\\processed\\hf_prompt_injection_transformer_ready.csv",
+  "trained_at": "2026-06-13T20:41:01.820959+00:00",
+  "epochs": 3,
+  "label_mapping": {
+    "0": "SAFE",
+    "1": "INJECTION"
+  },
+  "training_mode": "full_finetune",
+  "trainable_config": {
+    "freeze_base_model": false,
+    "freeze_encoder_layers": 0,
+    "frozen_layers": [],
+    "frozen_parameter_count": 0,
+    "trainable_parameter_count": 124647170,
+    "total_parameter_count": 124647170,
+    "trainable_parameter_ratio": 1.0
+  },
+  "train_rows": 261588,
+  "validation_rows": 32699,
+  "test_rows": 32698,
+  "train_size": 261588,
+  "validation_size": 32699,
+  "test_size": 32698,
+  "metrics": {
+    "evaluation_threshold": 0.02,
+    "accuracy": 0.992079026240137,
+    "precision": 0.9864641391559993,
+    "recall": 0.9976461843409317,
+    "f1": 0.9920236518739799,
+    "f2": 0.9953895405609187,
+    "false_positive_rate": 0.01335024767427812,
+    "false_negative_rate": 0.0023538156590683845,
+    "confusion_matrix": [
+      [
+        16333,
+        221
+      ],
+      [
+        38,
+        16106
+      ]
+    ],
+    "classification_report": {
+      "benign": {
+        "precision": 0.9976788223077393,
+        "recall": 0.9866497523257218,
+        "f1-score": 0.9921336370539104,
+        "support": 16554.0
+      },
+      "malicious": {
+        "precision": 0.9864641391559993,
+        "recall": 0.9976461843409317,
+        "f1-score": 0.9920236518739799,
+        "support": 16144.0
+      },
+      "accuracy": 0.992079026240137,
+      "macro avg": {
+        "precision": 0.9920714807318693,
+        "recall": 0.9921479683333267,
+        "f1-score": 0.9920786444639451,
+        "support": 32698.0
+      },
+      "weighted avg": {
+        "precision": 0.9921417911498186,
+        "recall": 0.992079026240137,
+        "f1-score": 0.9920793340156574,
+        "support": 32698.0
+      }
+    },
+    "classification_report_text": "              precision    recall  f1-score   support\n\n      benign       1.00      0.99      0.99     16554\n   malicious       0.99      1.00      0.99     16144\n\n    accuracy                           0.99     32698\n   macro avg       0.99      0.99      0.99     32698\nweighted avg       0.99      0.99      0.99     32698\n",
+    "roc_auc": 0.9989953050161211,
+    "average_precision": 0.9983039680092811,
+    "total_prediction_time_seconds": 87.83588959999906,
+    "avg_prediction_time_seconds": 0.002686277130099672,
+    "confusion_matrix_path": "F:\\Capstone Project\\prompt-injection-detector\\outputs\\transformer_confusion_matrices\\roberta_v4_confusion_matrix.png"
+  },
+  "created_by": "src.train_transformers"
+}
