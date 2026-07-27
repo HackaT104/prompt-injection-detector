@@ -10,6 +10,11 @@ from typing import Any
 import joblib
 
 from src.benign_intent import detect_benign_reference_intent
+from src.calibration_runtime import (
+    apply_probability_calibrator,
+    get_calibrated_threshold_entry,
+    load_runtime_calibrator,
+)
 from src.indirect_rule_detector import detect_indirect_by_rules
 from src.preprocessing import prepare_text_for_detection
 from src.rule_based import detect_by_rules
@@ -198,6 +203,20 @@ def _raw_model_score(model: Any, vectorized_text: Any) -> float | None:
         return float(raw_score)
 
 
+def _runtime_thresholds_for_model(
+    model_type: str,
+    fallback: dict[str, float],
+) -> tuple[dict[str, float], dict[str, Any] | None]:
+    entry = get_calibrated_threshold_entry(model_type)
+    if not entry:
+        return fallback, None
+    return {
+        "evaluation_threshold": float(entry.get("threshold_eval", fallback["evaluation_threshold"])),
+        "runtime_warn_threshold": float(entry.get("threshold_warn", fallback["runtime_warn_threshold"])),
+        "runtime_block_threshold": float(entry.get("threshold_block", fallback["runtime_block_threshold"])),
+    }, entry
+
+
 def detect_by_ml(
     text: str,
     model_type: str = "logistic_regression",
@@ -225,11 +244,27 @@ def detect_by_ml(
     vectorized = vectorizer.transform([cleaned])
     safe_probability, risk_score = _probabilities_for_binary_model(model, vectorized)
     raw_risk_score = risk_score
+    calibrated_score: float | None = None
+    calibration_method: str | None = None
+    calibration_warning: str | None = None
+    score_used = "raw_probability"
+    calibrator = load_runtime_calibrator(model_type)
+    if calibrator is not None:
+        calibrated_score = apply_probability_calibrator(calibrator, raw_risk_score)
+        risk_score = calibrated_score
+        safe_probability = 1.0 - risk_score
+        calibration_method = calibrator.__class__.__name__
+        score_used = "calibrated_probability"
+    else:
+        calibration_warning = (
+            "Không tìm thấy probability_calibrator.joblib cho model này; runtime đang dùng raw model score."
+        )
     benign_guard = detect_benign_reference_intent(text)
     # Benign guard is an explanatory signal only; compare/inference must expose the true model score.
     confidence = max(safe_probability, risk_score)
-    raw_score = _raw_model_score(model, vectorized)
-    thresholds = load_thresholds().get(model_type, DEFAULT_THRESHOLDS)
+    model_margin = _raw_model_score(model, vectorized)
+    saved_thresholds = load_thresholds().get(model_type, DEFAULT_THRESHOLDS)
+    thresholds, threshold_entry = _runtime_thresholds_for_model(model_type, saved_thresholds)
     evaluation_threshold = float(thresholds["evaluation_threshold"])
     warn_threshold = float(thresholds.get("runtime_warn_threshold", DEFAULT_THRESHOLDS["runtime_warn_threshold"]))
     block_threshold = float(thresholds.get("runtime_block_threshold", DEFAULT_THRESHOLDS["runtime_block_threshold"]))
@@ -247,7 +282,12 @@ def detect_by_ml(
             "safe": round(float(safe_probability), 6),
             "injection": round(float(risk_score), 6),
         },
-        "raw_score": None if raw_score is None else round(float(raw_score), 6),
+        "raw_score": round(float(raw_risk_score), 6),
+        "calibrated_score": None if calibrated_score is None else round(float(calibrated_score), 6),
+        "score_used": score_used,
+        "model_margin": None if model_margin is None else round(float(model_margin), 6),
+        "calibration_method": calibration_method,
+        "calibration_warning": calibration_warning,
         "model_path": str(MODEL_FILES[model_type]["model"]),
         "vectorizer_path": str(MODEL_FILES[model_type]["vectorizer"]),
         "benign_guard": benign_guard,
@@ -262,8 +302,16 @@ def detect_by_ml(
             "runtime_warn_threshold": warn_threshold,
             "runtime_block_threshold": block_threshold,
         },
+        "threshold_used": {
+            "evaluation": evaluation_threshold,
+            "warn": warn_threshold,
+            "block": block_threshold,
+        },
+        "threshold_source": "models/calibrated_thresholds.json" if threshold_entry else "models/model_thresholds.json",
+        "calibration_metadata": threshold_entry,
         "explanation": (
             f"ML model '{model_type}' dự đoán risk_score={risk_score:.4f}. "
+            f"Score used={score_used}; "
             f"Evaluation threshold={evaluation_threshold:.4f}; "
             f"Runtime thresholds: warn>={warn_threshold:.4f}, block>={block_threshold:.4f}; "
             f"confidence={confidence:.4f}; "

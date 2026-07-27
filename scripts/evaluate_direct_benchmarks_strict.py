@@ -108,14 +108,14 @@ def _load_or_score_predictions(
             return rows
 
     dataset_rows = _load_dataset_rows(dataset)
-    scores, _metadata = _score_model(
+    scores, metadata = _score_model(
         rows=dataset_rows,
         model_key=model,
         batch_size=batch_size,
         max_length=max_length,
         use_cuda=use_cuda,
     )
-    return _build_predictions(dataset_rows, scores, threshold=0.5)
+    return _build_predictions(dataset_rows, scores, threshold=0.5, row_metadata=metadata.get("row_metadata"))
 
 
 def _split_indices(predictions: list[dict[str, Any]], dataset: str, seed: int) -> tuple[list[int], list[int]]:
@@ -233,6 +233,75 @@ def _write_report(
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def _write_report_vi(
+    *,
+    path: Path,
+    dataset: str,
+    model: str,
+    threshold_summary: dict[str, Any],
+    validation_metrics: dict[str, Any],
+    test_metrics: dict[str, Any],
+    false_positives: list[dict[str, Any]],
+    false_negatives: list[dict[str, Any]],
+) -> None:
+    threshold = float(threshold_summary["threshold"])
+    lines = [
+        f"# Đánh giá strict direct benchmark - {dataset} / {model}",
+        "",
+        "## Protocol",
+        "",
+        "- Không dùng rule-based detector.",
+        "- Không dùng context-aware detector.",
+        "- Không dùng BIPIA/indirect pipeline.",
+        "- Split validation/test: 30% / 70%.",
+        "- Nếu dataset là `all`, split theo `dataset_name + label`; dataset riêng thì split theo `label`.",
+        "- Threshold chỉ được chọn trên validation, sau đó giữ cố định để đánh giá test.",
+        "",
+        "## Threshold",
+        "",
+        f"- Threshold chọn trên validation: `{threshold:.4f}`.",
+        f"- Validation F2: `{_format_metric(validation_metrics.get('f2'))}`.",
+        f"- Test F2: `{_format_metric(test_metrics.get('f2'))}`.",
+        "",
+        "## Metrics trên test",
+        "",
+        f"- Rows: `{test_metrics['rows']}`.",
+        f"- Accuracy: `{_format_metric(test_metrics.get('accuracy'))}`.",
+        f"- Precision: `{_format_metric(test_metrics.get('precision'))}`.",
+        f"- Recall: `{_format_metric(test_metrics.get('recall'))}`.",
+        f"- F1: `{_format_metric(test_metrics.get('f1'))}`.",
+        f"- F2: `{_format_metric(test_metrics.get('f2'))}`.",
+        f"- ROC-AUC: `{_format_metric(test_metrics.get('roc_auc'))}`.",
+        f"- PR-AUC: `{_format_metric(test_metrics.get('pr_auc'))}`.",
+        f"- Confusion matrix [[TN, FP], [FN, TP]]: `{test_metrics['confusion_matrix']}`.",
+        f"- False positives: `{test_metrics['false_positive_count']}`.",
+        f"- False negatives: `{test_metrics['false_negative_count']}`.",
+        "",
+        "## False positives mẫu",
+        "",
+    ]
+    if false_positives:
+        for row in false_positives[:10]:
+            lines.append(f"- `{row['id']}` score={row['score']} text={str(row.get('text', ''))[:220]}")
+    else:
+        lines.append("Không có false positive.")
+    lines.extend(["", "## False negatives mẫu", ""])
+    if false_negatives:
+        for row in false_negatives[:10]:
+            lines.append(f"- `{row['id']}` score={row['score']} text={str(row.get('text', ''))[:220]}")
+    else:
+        lines.append("Không có false negative.")
+    lines.extend(
+        [
+            "",
+            "## Kết luận",
+            "",
+            "Kết quả này là protocol chính thức hơn raw full-set threshold sweep vì không tune threshold trực tiếp trên test.",
+        ]
+    )
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def evaluate_strict(
     *,
     dataset: str,
@@ -313,6 +382,16 @@ def evaluate_strict(
     )
     _write_report(
         path=target_dir / "strict_evaluation_report.md",
+        dataset=dataset,
+        model=model,
+        threshold_summary=threshold_summary,
+        validation_metrics=validation_metrics,
+        test_metrics=test_metrics,
+        false_positives=false_positives,
+        false_negatives=false_negatives,
+    )
+    _write_report_vi(
+        path=target_dir / "strict_evaluation_report_vi.md",
         dataset=dataset,
         model=model,
         threshold_summary=threshold_summary,

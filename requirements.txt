@@ -13,7 +13,10 @@ datasets
 unidecode
 torch
 transformers==4.46.3
+huggingface-hub>=0.23.2,<1.0
 accelerate==0.34.2
 evaluate
 sentencepiece
 pypdf
+PyYAML
+tqdm

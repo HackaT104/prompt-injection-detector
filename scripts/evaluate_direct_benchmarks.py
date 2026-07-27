@@ -63,6 +63,11 @@ PREDICTION_COLUMNS = [
     "label",
     "predicted_label",
     "score",
+    "raw_score",
+    "score_source",
+    "calibration_method",
+    "logit_safe",
+    "logit_injection",
     "threshold",
     "attack_type",
     "source_label",
@@ -376,6 +381,7 @@ def _score_transformer(
     calibration_method = calibrator.__class__.__name__ if calibrator is not None else None
     scores: list[float] = []
     raw_scores: list[float] = []
+    row_metadata: list[dict[str, Any]] = []
     try:
         for batch in _batch_iter(cleaned_texts, batch_size):
             encoded = tokenizer(
@@ -389,6 +395,7 @@ def _score_transformer(
             with torch.no_grad():
                 outputs = model(**encoded)
                 probabilities = torch.softmax(outputs.logits, dim=-1)
+            batch_logits = outputs.logits.detach().cpu().tolist()
             batch_scores = probabilities[:, LABEL2ID["INJECTION"]].detach().cpu().tolist()
             raw_scores.extend(float(score) for score in batch_scores)
             if calibrator is not None:
@@ -396,6 +403,18 @@ def _score_transformer(
                 scores.extend(float(min(1.0, max(0.0, value))) for value in calibrated)
             else:
                 scores.extend(float(score) for score in batch_scores)
+            for raw_score, logits in zip(batch_scores, batch_logits):
+                safe_logit = float(logits[LABEL2ID["SAFE"]])
+                injection_logit = float(logits[LABEL2ID["INJECTION"]])
+                row_metadata.append(
+                    {
+                        "raw_score": round(float(raw_score), 8),
+                        "score_source": "transformer_softmax_probability",
+                        "calibration_method": calibration_method or "",
+                        "logit_safe": round(safe_logit, 8),
+                        "logit_injection": round(injection_logit, 8),
+                    }
+                )
     except RuntimeError as exc:
         if use_cuda and "out of memory" in str(exc).lower():
             clear_transformer_runtime_cache()
@@ -415,6 +434,8 @@ def _score_transformer(
         "calibration_method": calibration_method,
         "raw_score_min": min(raw_scores) if raw_scores else None,
         "raw_score_max": max(raw_scores) if raw_scores else None,
+        "row_metadata": row_metadata,
+        "logits_saved": True,
         "warnings": warnings,
     }
 
@@ -440,9 +461,15 @@ def _score_model(
     raise ValueError(f"Unsupported model: {model_key}")
 
 
-def _build_predictions(rows: list[dict[str, Any]], scores: list[float], threshold: float) -> list[dict[str, Any]]:
+def _build_predictions(
+    rows: list[dict[str, Any]],
+    scores: list[float],
+    threshold: float,
+    row_metadata: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
     predictions: list[dict[str, Any]] = []
-    for row, score in zip(rows, scores):
+    metadata_rows = row_metadata or [{} for _ in rows]
+    for row, score, metadata in zip(rows, scores, metadata_rows):
         predictions.append(
             {
                 "id": row.get("id", ""),
@@ -451,6 +478,11 @@ def _build_predictions(rows: list[dict[str, Any]], scores: list[float], threshol
                 "label": int(row["label"]),
                 "predicted_label": 1 if float(score) >= threshold else 0,
                 "score": round(float(score), 8),
+                "raw_score": metadata.get("raw_score", round(float(score), 8)),
+                "score_source": metadata.get("score_source", "predict_proba_positive_class"),
+                "calibration_method": metadata.get("calibration_method", ""),
+                "logit_safe": metadata.get("logit_safe", ""),
+                "logit_injection": metadata.get("logit_injection", ""),
                 "threshold": round(float(threshold), 4),
                 "attack_type": row.get("attack_type", ""),
                 "source_label": row.get("source_label", ""),
@@ -781,7 +813,7 @@ def evaluate_direct_benchmark(
         split_threshold=split_threshold,
         seed=seed,
     )
-    predictions = _build_predictions(rows, scores, threshold)
+    predictions = _build_predictions(rows, scores, threshold, metadata.get("row_metadata"))
 
     if test_indices is None:
         metric_rows = rows

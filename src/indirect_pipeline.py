@@ -12,6 +12,9 @@ from src.indirect_context_detector import detect_context_manipulation
 from src.indirect_rule_detector import detect_indirect_by_rules
 from src.rule_based import detect_by_rules
 from src.safe_context_builder import build_safe_context
+from src.runtime_config import load_runtime_config
+from src.security.preprocessing import preprocess_security_text
+from src.roberta_runtime import roberta_service
 from src.transformer_utils import (
     is_finetuned_transformer_checkpoint,
     predict_transformer,
@@ -47,7 +50,29 @@ def load_indirect_config(
 ) -> IndirectPipelineConfig:
     payload: dict[str, Any] = {}
     path = Path(config_path) if config_path else DEFAULT_CONFIG_PATH
-    if path.exists():
+    if config_path is None:
+        runtime = load_runtime_config()
+        document = dict(runtime.get("document_security") or {})
+        chunk_weights = dict(document.get("chunk_weights") or {})
+        selected_weights = {
+            "rule_score": float(chunk_weights.get("rule", 0.35)),
+            "model_score": float(chunk_weights.get("roberta", 0.45)),
+            "context_score": float(chunk_weights.get("context", 0.20)),
+        }
+        payload = {
+            "weights": selected_weights,
+            "thresholds": {
+                "sanitize_or_warn": document.get("quarantine_threshold", 0.50),
+                "block": document.get("block_threshold", 0.80),
+            },
+            "chunking": {
+                "max_chars": document.get("chunk_max_chars", 1200),
+                "overlap_chars": document.get("chunk_overlap_chars", 160),
+            },
+            "default_model": (runtime.get("securityModel") or {}).get("modelName", "roberta_v4"),
+            "safe_context_policy": document.get("safe_context_policy", "exclude"),
+        }
+    elif path.exists():
         payload = json.loads(path.read_text(encoding="utf-8-sig"))
     if overrides:
         payload = {**payload, **overrides}
@@ -192,17 +217,77 @@ def detect_indirect_content(
     analyzed_chunks: list[dict[str, Any]] = []
     warnings: list[str] = []
     for chunk in chunks:
-        rule_result = detect_indirect_by_rules(str(user_task), chunk.text)
-        ml_result = scorer(chunk.cleaned_text, selected_model, use_cuda)
-        context_result = detect_context_manipulation(str(user_task), chunk.text)
-        model_score = ml_result.get("model_score")
-        numeric_model_score = None if model_score is None else float(model_score)
-        final_score, degraded, effective_weights = _ensemble_score(
-            float(rule_result["risk_score"]),
-            numeric_model_score,
-            float(context_result["context_score"]),
-            config,
+        preprocessing = preprocess_security_text(chunk.text)
+        variants = [{
+            "variant_id": "v0", "parent_variant_id": None, "transform": "original",
+            "transform_chain": [], "depth": 0, "text": chunk.text,
+            "confidence": 1.0, "text_hash": None,
+        }]
+        variants.extend(item for item in preprocessing.get("variants", []) if isinstance(item, dict))
+        if model_scorer is None and selected_model == roberta_service.resolved_model_name and len(variants) > 1:
+            batch_results = roberta_service.predict_many(
+                [str(item.get("text", "")) for item in variants],
+                use_cuda=use_cuda,
+                stage="input",
+            )
+            ml_results = [
+                {
+                    "available": result.get("available", False),
+                    "model": result.get("modelName"),
+                    "model_path": result.get("modelPath"),
+                    "model_score": result.get("score"),
+                    "predicted_label": 1 if float(result.get("score") or 0.0) >= float((result.get("thresholdUsed") or {}).get("evaluation", 0.5)) else 0,
+                    "thresholds": result.get("thresholdUsed", {}),
+                    "runtime_device": "runtime_service",
+                    "error": result.get("error"),
+                }
+                for result in batch_results
+            ]
+        else:
+            ml_results = [scorer(str(item.get("text", "")), selected_model, use_cuda) for item in variants]
+
+        variant_analyses: list[dict[str, Any]] = []
+        for variant, variant_ml in zip(variants, ml_results):
+            variant_text = str(variant.get("text", ""))
+            variant_rule = detect_indirect_by_rules(str(user_task), variant_text)
+            variant_context = detect_context_manipulation(str(user_task), variant_text)
+            variant_model_score = variant_ml.get("model_score")
+            numeric_variant_model = None if variant_model_score is None else float(variant_model_score)
+            variant_final, variant_degraded, variant_weights = _ensemble_score(
+                float(variant_rule["risk_score"]),
+                numeric_variant_model,
+                float(variant_context["context_score"]),
+                config,
+            )
+            has_semantic_signal = bool(variant_rule.get("matched_rules")) or float(variant_context["context_score"]) >= config.allow_threshold
+            if int(variant.get("depth", 0)) > 0 and not has_semantic_signal:
+                variant_final = min(variant_final, 0.24)
+            variant_analyses.append({
+                "variant": variant,
+                "rule": variant_rule,
+                "ml": variant_ml,
+                "context": variant_context,
+                "model_score": numeric_variant_model,
+                "final_score": variant_final,
+                "degraded": variant_degraded,
+                "effective_weights": variant_weights,
+                "has_semantic_signal": has_semantic_signal,
+            })
+
+        transformed = [item for item in variant_analyses if int(item["variant"].get("depth", 0)) > 0]
+        if transformed and not any(item["has_semantic_signal"] for item in transformed):
+            variant_analyses[0]["final_score"] = min(variant_analyses[0]["final_score"], 0.24)
+        selected_analysis = max(
+            variant_analyses,
+            key=lambda item: (item["final_score"], int(item["variant"].get("depth", 0))),
         )
+        rule_result = selected_analysis["rule"]
+        ml_result = selected_analysis["ml"]
+        context_result = selected_analysis["context"]
+        numeric_model_score = selected_analysis["model_score"]
+        final_score = float(selected_analysis["final_score"])
+        degraded = bool(selected_analysis["degraded"])
+        effective_weights = selected_analysis["effective_weights"]
         action = action_from_indirect_score(final_score, config)
         if degraded:
             warning = f"ML detector unavailable for {chunk.chunk_id}; ensemble weights were renormalized."
@@ -230,6 +315,32 @@ def detect_indirect_content(
                 "ensemble_degraded": degraded,
                 "effective_weights": effective_weights,
                 "ml_result": ml_result,
+                "variant_analysis": {
+                    "selectedVariantId": selected_analysis["variant"].get("variant_id"),
+                    "selectedTransform": selected_analysis["variant"].get("transform"),
+                    "selectedTransformChain": selected_analysis["variant"].get("transform_chain", []),
+                    "selectedDepth": selected_analysis["variant"].get("depth", 0),
+                    "variantCount": preprocessing.get("variant_count", 0),
+                    "detectedEncodings": preprocessing.get("detected_encodings", []),
+                    "detectedObfuscations": preprocessing.get("detected_obfuscations", []),
+                    "obfuscationScore": preprocessing.get("obfuscation_score", 0.0),
+                    "variants": [
+                        {
+                            "variantId": item["variant"].get("variant_id"),
+                            "parentVariantId": item["variant"].get("parent_variant_id"),
+                            "transform": item["variant"].get("transform"),
+                            "transformChain": item["variant"].get("transform_chain", []),
+                            "depth": item["variant"].get("depth", 0),
+                            "textHash": item["variant"].get("text_hash"),
+                            "confidence": item["variant"].get("confidence", 1.0),
+                            "ruleScore": item["rule"].get("risk_score", 0.0),
+                            "modelScore": item["model_score"],
+                            "contextScore": item["context"].get("context_score", 0.0),
+                            "finalScore": round(float(item["final_score"]), 4),
+                        }
+                        for item in variant_analyses
+                    ],
+                },
             }
         )
 

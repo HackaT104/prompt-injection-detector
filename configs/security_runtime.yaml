@@ -1,0 +1,143 @@
+schema_version: hybrid-sandwich-security-v1
+
+security_model:
+  provider: roberta
+  model_name: roberta_v4
+  model_path: models/transformers/roberta_v4
+  tokenizer_path: models/transformers/roberta_v4
+  model_version: roberta-v4-neuralchemy
+  training_dataset_version: neuralchemy-full-v4
+  evaluation_dataset_version: rogue-security-diagnostic-2026-07-23
+  max_length: 128
+  batch_size: 8
+  device: auto
+  eager_load: true
+  threshold_version: roberta-v4-artifact-v1
+  evaluation_threshold: 0.02
+  input_warn_threshold: 0.30
+  input_block_threshold: 0.45
+  output_warn_threshold: 0.30
+  output_block_threshold: 0.85
+  output_threshold_status: baseline_not_optimized
+  calibrator_enabled: false
+  calibrator_path: null
+  calibrator_version: disabled_incompatible_provenance
+  active_input: true
+  active_output: true
+
+versions:
+  policy: hybrid-sandwich-policy-v1
+  rules: rule-runtime-v1
+  preprocessing: security-preprocessing-v1
+  prompt_template: secure-prompt-v1
+
+request_limits:
+  max_text_chars: 100000
+  max_file_bytes: 8388608
+  allowed_document_extensions:
+    - .txt
+    - .docx
+    - .pdf
+
+encoding_detection:
+  max_decode_depth: 2
+  max_variants: 20
+  max_input_length: 100000
+  max_decoded_length: 100000
+  max_expansion_ratio: 10
+  min_printable_ratio: 0.75
+  min_readability_score: 0.4
+  deduplicate_by_hash: true
+  decode_timeout_ms: 75
+  max_total_variant_chars: 400000
+
+source_trust:
+  system: 1.0
+  application_policy: 1.0
+  developer: 0.95
+  admin: 0.85
+  authenticated_user: 0.65
+  project_context: 0.55
+  uploaded_document: 0.25
+  web: 0.20
+  email: 0.20
+  rag: 0.25
+  tool_output: 0.35
+  unknown: 0.10
+
+input_security:
+  weights:
+    chat:
+      rule: 0.30
+      roberta: 0.50
+      context: 0.20
+      source: 0.00
+      obfuscation: 0.00
+      tool: 0.00
+      sensitive_target: 0.00
+    external_document:
+      rule: 0.20
+      roberta: 0.30
+      context: 0.28
+      source: 0.10
+      obfuscation: 0.07
+      tool: 0.00
+      sensitive_target: 0.05
+    tool:
+      rule: 0.15
+      roberta: 0.20
+      context: 0.20
+      source: 0.10
+      obfuscation: 0.05
+      tool: 0.25
+      sensitive_target: 0.05
+  thresholds:
+    warn: 0.30
+    block: 0.70
+  critical_floor: 0.90
+  hard_block_rule_codes:
+    - PI_DATA_EXFILTRATION
+    - PI_TOOL_ABUSE_CRITICAL
+    - PI_CODE_EXECUTION_CRITICAL
+    - PI_CYBER_ABUSE_CRITICAL
+
+document_security:
+  chunk_weights:
+    rule: 0.35
+    roberta: 0.45
+    context: 0.20
+  chunk_max_chars: 1200
+  chunk_overlap_chars: 160
+  safe_context_policy: exclude
+  quarantine_threshold: 0.50
+  block_threshold: 0.80
+
+llm:
+  call_on_safe: true
+  call_on_warning: false
+  call_on_blocked: false
+  max_retries: 1
+  timeout_seconds: 20
+
+tool_security:
+  enabled: true
+  deny_untrusted_source: true
+  default_action: deny
+  require_confirmation_for_medium_or_higher: true
+
+output_security:
+  enabled: true
+  max_regenerations: 1
+  safe_fallback: >-
+    The response could not be returned because it did not pass the security
+    checks. Please rephrase the request or try again with less sensitive data.
+  actions:
+    secret: redact
+    prompt_leak: regenerate
+    unsafe_model_output: regenerate
+    unauthorized_pii: redact
+
+fail_safe:
+  chat_without_tools: warn
+  external_document: block
+  tool_enabled_request: block

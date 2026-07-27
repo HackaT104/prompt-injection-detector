@@ -24,6 +24,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+import joblib
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
@@ -46,6 +48,8 @@ from scripts.evaluate_direct_benchmarks_strict import (  # noqa: E402
 
 
 CALIBRATION_DIR = DEFAULT_OUTPUT_DIR / "calibration"
+RUNTIME_CALIBRATION_DIR = PROJECT_ROOT / "models" / "calibration"
+CALIBRATED_THRESHOLDS_PATH = PROJECT_ROOT / "models" / "calibrated_thresholds.json"
 
 
 def _parse_args() -> argparse.Namespace:
@@ -106,6 +110,19 @@ def _calibration_errors(labels: list[int], scores: list[float], bins: int = 10) 
             }
         )
     return {"ece": ece, "mce": mce, "bins": bin_rows}
+
+
+def _score_stats(scores: list[float]) -> dict[str, float | None]:
+    if not scores:
+        return {"min": None, "max": None, "mean": None, "std": None}
+    mean = sum(scores) / len(scores)
+    variance = sum((score - mean) ** 2 for score in scores) / len(scores)
+    return {
+        "min": min(scores),
+        "max": max(scores),
+        "mean": mean,
+        "std": math.sqrt(variance),
+    }
 
 
 def _fit_calibrators(validation_labels: list[int], validation_scores: list[float]) -> tuple[str | None, Any | None, dict[str, Any]]:
@@ -220,6 +237,31 @@ def _plot_reliability(path: Path, raw_bins: list[dict[str, Any]], calibrated_bin
     plt.close()
 
 
+def _plot_single_reliability(path: Path, bins: list[dict[str, Any]], title: str) -> None:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    xs: list[float] = []
+    ys: list[float] = []
+    for row in bins:
+        if row["mean_score"] is not None and row["fraction_positive"] is not None:
+            xs.append(float(row["mean_score"]))
+            ys.append(float(row["fraction_positive"]))
+
+    plt.figure(figsize=(6, 6))
+    plt.plot([0, 1], [0, 1], linestyle="--", color="gray", label="perfect calibration")
+    plt.plot(xs, ys, marker="o", label=title)
+    plt.xlabel("Mean predicted score")
+    plt.ylabel("Fraction positive")
+    plt.title(title)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(path, dpi=150)
+    plt.close()
+
+
 def _calibrated_prediction_rows(
     rows: list[dict[str, Any]],
     split_name: str,
@@ -248,6 +290,254 @@ def _calibrated_prediction_rows(
             }
         )
     return output
+
+
+def _raw_test_prediction_rows(rows: list[dict[str, Any]], raw_threshold: float) -> list[dict[str, Any]]:
+    output: list[dict[str, Any]] = []
+    for row in rows:
+        raw_score = float(row["score"])
+        output.append(
+            {
+                "id": row.get("id", ""),
+                "dataset_name": row.get("dataset_name", ""),
+                "text": row.get("text", ""),
+                "label": int(float(row["label"])),
+                "score_type": "raw_probability",
+                "raw_score": round(raw_score, 8),
+                "threshold": round(raw_threshold, 4),
+                "predicted_label": 1 if raw_score >= raw_threshold else 0,
+                "attack_type": row.get("attack_type", ""),
+                "source_label": row.get("source_label", ""),
+                "logit_safe": row.get("logit_safe", ""),
+                "logit_injection": row.get("logit_injection", ""),
+            }
+        )
+    return output
+
+
+def _calibrated_test_prediction_rows(
+    rows: list[dict[str, Any]],
+    calibrated_scores: list[float],
+    calibrated_threshold: float,
+    method: str | None,
+) -> list[dict[str, Any]]:
+    output: list[dict[str, Any]] = []
+    for row, calibrated_score in zip(rows, calibrated_scores):
+        output.append(
+            {
+                "id": row.get("id", ""),
+                "dataset_name": row.get("dataset_name", ""),
+                "text": row.get("text", ""),
+                "label": int(float(row["label"])),
+                "score_type": "calibrated_probability",
+                "calibration_method": method,
+                "raw_score": round(float(row["score"]), 8),
+                "calibrated_score": round(float(calibrated_score), 8),
+                "threshold": round(calibrated_threshold, 4),
+                "predicted_label": 1 if float(calibrated_score) >= calibrated_threshold else 0,
+                "attack_type": row.get("attack_type", ""),
+                "source_label": row.get("source_label", ""),
+                "logit_safe": row.get("logit_safe", ""),
+                "logit_injection": row.get("logit_injection", ""),
+            }
+        )
+    return output
+
+
+def _delta(before: Any, after: Any) -> str:
+    try:
+        return _format_metric(float(after) - float(before))
+    except (TypeError, ValueError):
+        return "n/a"
+
+
+def _write_calibration_report_vi(path: Path, metrics: dict[str, Any]) -> None:
+    raw = metrics["raw_test_metrics"]
+    calibrated = metrics["calibrated_test_metrics"]
+    method = metrics.get("selected_calibration_method") or "không có"
+    temperature = metrics.get("calibration_metadata", {}).get("temperature_scaling", {})
+    lines = [
+        f"# Báo cáo calibration - {metrics['dataset']} / {metrics['model']}",
+        "",
+        "## Protocol",
+        "",
+        "- Không dùng rule-based detector.",
+        "- Không dùng context-aware detector.",
+        "- Split: validation 30%, test 70%.",
+        f"- Split strategy: `{metrics.get('split_strategy')}`.",
+        "- Calibrator fit trên validation, sau đó apply lên test.",
+        "- Threshold raw và calibrated đều được chọn trên validation, không tune trên test.",
+        "",
+        "## Calibration method",
+        "",
+        f"- Method được chọn: `{method}`.",
+        f"- Temperature Scaling: `{temperature.get('attempted', False)}`.",
+        f"- Lý do Temperature Scaling: {temperature.get('reason', 'n/a')}",
+        "",
+        "## Threshold",
+        "",
+        f"- Raw threshold: `{_format_metric(metrics.get('raw_threshold'))}`.",
+        f"- Calibrated threshold: `{_format_metric(metrics.get('calibrated_threshold'))}`.",
+        "",
+        "## Metrics trên test",
+        "",
+        "| Metric | Raw | Calibrated | Delta |",
+        "| --- | ---: | ---: | ---: |",
+    ]
+    for key, label in [
+        ("accuracy", "Accuracy"),
+        ("precision", "Precision"),
+        ("recall", "Recall"),
+        ("f1", "F1"),
+        ("f2", "F2"),
+        ("roc_auc", "ROC-AUC"),
+        ("pr_auc", "PR-AUC"),
+        ("brier", "Brier Score"),
+        ("ece", "ECE"),
+    ]:
+        lines.append(
+            f"| {label} | {_format_metric(raw.get(key))} | {_format_metric(calibrated.get(key))} | {_delta(raw.get(key), calibrated.get(key))} |"
+        )
+    lines.extend(
+        [
+            "",
+            "## Confusion matrix",
+            "",
+            f"- Raw [[TN, FP], [FN, TP]]: `{raw.get('confusion_matrix')}`.",
+            f"- Calibrated [[TN, FP], [FN, TP]]: `{calibrated.get('confusion_matrix')}`.",
+            "",
+            "## Nhận xét",
+            "",
+            "- Calibration giúp score/probability dễ diễn giải hơn, đặc biệt khi raw threshold quá thấp.",
+            "- Nếu F2 tăng sau calibration, mô hình giữ được mục tiêu ưu tiên recall nhưng threshold trở nên hợp lý hơn.",
+            "- Nếu precision giảm nhưng recall tăng, đây là trade-off do selection metric F2 ưu tiên giảm false negative.",
+        ]
+    )
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _runtime_dataset_name(dataset: str) -> str:
+    return "direct_all" if dataset == "all" else f"direct_{dataset}"
+
+
+def _save_runtime_calibrator(dataset: str, model: str, calibrator: Any | None, report_calibrator_path: Path) -> Path | None:
+    if calibrator is None:
+        return None
+    runtime_dir = RUNTIME_CALIBRATION_DIR / _runtime_dataset_name(dataset) / model
+    runtime_dir.mkdir(parents=True, exist_ok=True)
+    runtime_path = runtime_dir / "probability_calibrator.joblib"
+    joblib.dump(calibrator, runtime_path)
+    # Also ensure the report artifact exists even when runtime save is the primary write.
+    if not report_calibrator_path.exists():
+        joblib.dump(calibrator, report_calibrator_path)
+    return runtime_path
+
+
+def _refresh_calibrated_thresholds() -> None:
+    payload: dict[str, Any] = {}
+    for metrics_path in sorted((CALIBRATION_DIR / "all").glob("*/calibration_metrics.json")):
+        metrics = _read_json(metrics_path)
+        if not metrics:
+            continue
+        model = str(metrics.get("model"))
+        method = metrics.get("selected_calibration_method")
+        payload[model] = {
+            "dataset": "direct_all",
+            "calibration_method": method,
+            "score_type": "calibrated_probability",
+            "threshold_eval": float(metrics.get("calibrated_threshold")),
+            "threshold_warn": 0.50,
+            "threshold_block": 0.80,
+            "selection_metric": "F2",
+            "validation_split": "30%",
+            "test_split": "70%",
+            "split_strategy": metrics.get("split_strategy"),
+            "calibrator_path": str(RUNTIME_CALIBRATION_DIR / "direct_all" / model / "probability_calibrator.joblib"),
+            "report_calibrator_path": str(metrics_path.parent / "probability_calibrator.joblib"),
+            "notes": (
+                "Threshold selected on validation, evaluated on test. "
+                "threshold_eval is optimized for evaluation/F2; warn/block are stricter runtime policy thresholds to reduce false positives."
+            ),
+            "test_metrics": {
+                "accuracy": metrics.get("calibrated_test_metrics", {}).get("accuracy"),
+                "precision": metrics.get("calibrated_test_metrics", {}).get("precision"),
+                "recall": metrics.get("calibrated_test_metrics", {}).get("recall"),
+                "f1": metrics.get("calibrated_test_metrics", {}).get("f1"),
+                "f2": metrics.get("calibrated_test_metrics", {}).get("f2"),
+                "roc_auc": metrics.get("calibrated_test_metrics", {}).get("roc_auc"),
+                "pr_auc": metrics.get("calibrated_test_metrics", {}).get("pr_auc"),
+                "brier": metrics.get("calibrated_test_metrics", {}).get("brier"),
+                "ece": metrics.get("calibrated_test_metrics", {}).get("ece"),
+                "confusion_matrix": metrics.get("calibrated_test_metrics", {}).get("confusion_matrix"),
+            },
+        }
+    CALIBRATED_THRESHOLDS_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def _stats_text(stats: dict[str, Any]) -> str:
+    return (
+        f"min={_format_metric(stats.get('min'))}, "
+        f"max={_format_metric(stats.get('max'))}, "
+        f"mean={_format_metric(stats.get('mean'))}, "
+        f"std={_format_metric(stats.get('std'))}"
+    )
+
+
+def write_score_source_audit(path: Path = DEFAULT_OUTPUT_DIR / "score_source_audit.md") -> None:
+    source_map = {
+        "logistic_regression": "scikit-learn `predict_proba` positive class từ TF-IDF LogisticRegression; nếu không có predict_proba mới fallback sigmoid(decision_function).",
+        "random_forest": "scikit-learn `predict_proba` positive class từ TF-IDF RandomForest; tương đương trung bình vote/probability của cây.",
+        "roberta": "Transformer softmax probability của class INJECTION từ sequence-classification logits.",
+        "xlm_roberta": "Transformer softmax probability của class INJECTION từ sequence-classification logits.",
+    }
+    rows: list[str] = []
+    for model in ["logistic_regression", "random_forest", "roberta", "xlm_roberta"]:
+        metrics = _read_json(CALIBRATION_DIR / "all" / model / "calibration_metrics.json") or {}
+        method = metrics.get("selected_calibration_method")
+        report_calibrator = CALIBRATION_DIR / "all" / model / "probability_calibrator.joblib"
+        runtime_calibrator = RUNTIME_CALIBRATION_DIR / "direct_all" / model / "probability_calibrator.joblib"
+        raw_val_stats = metrics.get("raw_validation_score_stats", {})
+        raw_test_stats = metrics.get("raw_test_score_stats", {})
+        warning = (
+            "Đã có calibrator runtime/report."
+            if runtime_calibrator.exists()
+            else "Chưa có calibrator runtime; score raw có thể chưa calibrated."
+        )
+        rows.append(
+            "| "
+            + " | ".join(
+                [
+                    model,
+                    source_map[model],
+                    "Có" if method else "Không",
+                    str(method or "N/A"),
+                    "Có" if report_calibrator.exists() else "Không",
+                    "Có" if runtime_calibrator.exists() else "Không",
+                    _stats_text(raw_val_stats),
+                    _stats_text(raw_test_stats),
+                    warning,
+                ]
+            )
+            + " |"
+        )
+
+    lines = [
+        "# Audit nguồn score cho Direct External Evaluation",
+        "",
+        "Audit này chỉ xét model-only direct benchmark scoring. Không dùng rule-based, context-aware, BIPIA hoặc indirect pipeline.",
+        "",
+        "| Model | Score source | Đã calibrate? | Calibration method | Report calibrator | Runtime calibrator | Raw validation score stats | Raw test score stats | Warning |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+        *rows,
+        "",
+        "## Ghi chú",
+        "",
+        "- Logistic Regression/Random Forest dùng `predict_proba` của scikit-learn.",
+        "- RoBERTa/XLM-RoBERTa dùng softmax probability của class INJECTION; runtime Transformer cũng trả về logits.",
+        "- Temperature Scaling chưa chạy trong calibration hiện tại nếu prediction CSV chỉ có probability/score và chưa có logits được lưu từ direct benchmark scorer.",
+        "- Threshold/calibrator chính thức phải được fit/chọn trên validation và chỉ đánh giá trên test.",
+    ]
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def calibrate_scores(
@@ -312,11 +602,28 @@ def calibrate_scores(
         )
     )
     _write_csv(target_dir / "calibrated_predictions.csv", rows)
+    _write_csv(target_dir / "raw_test_predictions.csv", _raw_test_prediction_rows(test_rows, raw_threshold))
+    _write_csv(
+        target_dir / "calibrated_test_predictions.csv",
+        _calibrated_test_prediction_rows(test_rows, calibrated_test_scores, calibrated_threshold, method),
+    )
     _plot_reliability(
         target_dir / "reliability_diagram.png",
         raw_test_metrics["calibration_bins"],
         calibrated_test_metrics["calibration_bins"],
     )
+    _plot_single_reliability(
+        target_dir / "reliability_diagram_raw.png",
+        raw_test_metrics["calibration_bins"],
+        "Raw reliability",
+    )
+    _plot_single_reliability(
+        target_dir / "reliability_diagram_calibrated.png",
+        calibrated_test_metrics["calibration_bins"],
+        "Calibrated reliability",
+    )
+    report_calibrator_path = target_dir / "probability_calibrator.joblib"
+    runtime_calibrator_path = _save_runtime_calibrator(dataset, model, calibrator, report_calibrator_path)
 
     metrics = {
         "dataset": dataset,
@@ -327,6 +634,12 @@ def calibrate_scores(
         "calibration_fit_split": "validation",
         "selected_calibration_method": method,
         "calibration_metadata": calibration_metadata,
+        "probability_calibrator_path": str(report_calibrator_path) if report_calibrator_path.exists() else None,
+        "runtime_probability_calibrator_path": str(runtime_calibrator_path) if runtime_calibrator_path else None,
+        "raw_validation_score_stats": _score_stats(validation_scores),
+        "raw_test_score_stats": _score_stats(test_scores),
+        "calibrated_validation_score_stats": _score_stats(calibrated_validation_scores),
+        "calibrated_test_score_stats": _score_stats(calibrated_test_scores),
         "raw_threshold": raw_threshold,
         "raw_validation_metrics": raw_validation_metrics,
         "raw_test_metrics": raw_test_metrics,
@@ -338,6 +651,9 @@ def calibrate_scores(
         json.dumps(metrics, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
+    _write_calibration_report_vi(target_dir / "calibration_report_vi.md", metrics)
+    _refresh_calibrated_thresholds()
+    write_score_source_audit()
     write_threshold_calibration_summary()
     return metrics
 

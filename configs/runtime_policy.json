@@ -1,0 +1,26 @@
+{
+  "policyVersion": "runtime-policy-v1",
+  "ruleVersion": "rule-runtime-v1",
+  "runtimeModel": "roberta",
+  "modelVersion": "roberta-v5",
+  "weights": {
+    "rule": 0.3,
+    "roberta": 0.5,
+    "context": 0.2
+  },
+  "thresholds": {
+    "warn": 0.3,
+    "block": 0.7
+  },
+  "hardBlockRuleCodes": [
+    "PI_DATA_EXFILTRATION",
+    "PI_TOOL_ABUSE_CRITICAL",
+    "PI_CODE_EXECUTION_CRITICAL",
+    "PI_CYBER_ABUSE_CRITICAL"
+  ],
+  "llm": {
+    "callOnSafe": true,
+    "callOnWarning": false,
+    "callOnBlocked": false
+  }
+}

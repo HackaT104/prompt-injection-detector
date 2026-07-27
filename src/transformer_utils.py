@@ -5,7 +5,9 @@ from __future__ import annotations
 import gc
 import importlib
 import json
+import os
 import sys
+import unicodedata
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -26,7 +28,13 @@ from sklearn.metrics import (
 )
 from sklearn.model_selection import train_test_split
 
-from src.benign_intent import detect_benign_reference_intent
+from src.benign_intent import detect_benign_reference_intent, detect_runtime_benign_intent
+from src.calibration_runtime import (
+    apply_probability_calibrator,
+    canonical_model_key,
+    get_calibrated_threshold_entry,
+    load_runtime_calibrator,
+)
 from src.file_utils import safe_write_text
 from src.language_utils import detect_language
 from src.preprocessing import clean_text, prepare_text_for_detection
@@ -456,6 +464,77 @@ def softmax_positive_scores(logits: np.ndarray) -> np.ndarray:
     return probabilities[:, 1].astype(float)
 
 
+def normalize_transformer_inference_text(text: Any) -> str:
+    """Match the v5 training text normalization: NFC + whitespace normalization.
+
+    Rule-based detection uses canonical English normalization, but RoBERTa v5 was
+    continued on the raw `text` column. Keeping the model input train-like avoids
+    turning benign Vietnamese queries into out-of-distribution accentless text.
+    """
+    if text is None:
+        return ""
+    return " ".join(unicodedata.normalize("NFC", str(text)).strip().split())
+
+
+def _forward_transformer_variant(
+    *,
+    tokenizer: Any,
+    model: Any,
+    torch: Any,
+    device: Any,
+    text: str,
+    max_length: int,
+) -> dict[str, Any]:
+    encoded = tokenizer(
+        text,
+        truncation=True,
+        padding=True,
+        max_length=max_length,
+        return_tensors="pt",
+    )
+    encoded = {key: value.to(device) for key, value in encoded.items()}
+    with torch.no_grad():
+        outputs = model(**encoded)
+        probabilities_tensor = torch.softmax(outputs.logits, dim=-1)[0]
+    logits = [float(value) for value in outputs.logits[0].detach().cpu().tolist()]
+    probabilities = [float(value) for value in probabilities_tensor.detach().cpu().tolist()]
+    return {"logits": logits, "probabilities": probabilities}
+
+
+def _load_checkpoint_thresholds(model_dir: Path) -> dict[str, float] | None:
+    for filename in ["metrics.json", "training_metadata.json"]:
+        path = model_dir / filename
+        if not path.exists():
+            continue
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8-sig"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        thresholds = payload.get("thresholds")
+        if isinstance(thresholds, dict):
+            return {
+                "evaluation_threshold": float(
+                    thresholds.get("evaluation_threshold", DEFAULT_TRANSFORMER_WARN_THRESHOLD)
+                ),
+                "runtime_warn_threshold": float(
+                    thresholds.get("runtime_warn_threshold", DEFAULT_TRANSFORMER_WARN_THRESHOLD)
+                ),
+                "runtime_block_threshold": float(
+                    thresholds.get("runtime_block_threshold", DEFAULT_TRANSFORMER_BLOCK_THRESHOLD)
+                ),
+            }
+    return None
+
+
+def _runtime_calibration_enabled() -> bool:
+    return str(os.getenv("ENABLE_TRANSFORMER_RUNTIME_CALIBRATION", "0")).strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+
+
 def action_from_score(score: float, warn_threshold: float, block_threshold: float) -> str:
     if score >= block_threshold:
         return "block"
@@ -560,6 +639,8 @@ def predict_transformer(
     max_length: int = 128,
     thresholds: dict[str, float] | None = None,
     use_cuda: bool = True,
+    use_intent_guard: bool = True,
+    use_runtime_calibration: bool | None = None,
 ) -> dict[str, Any]:
     """Run inference with a fine-tuned Transformer model directory."""
     model_dir = Path(model_path)
@@ -589,53 +670,129 @@ def predict_transformer(
         torch, tokenizer, model, device = _load_transformer_artifacts_cached(model_dir_key, False)
 
     prepared = prepare_text_for_detection(text)
-    encoded = tokenizer(
-        prepared["cleaned_text"],
-        truncation=True,
-        padding=True,
-        max_length=max_length,
-        return_tensors="pt",
-    )
-    encoded = {key: value.to(device) for key, value in encoded.items()}
-    with torch.no_grad():
-        outputs = model(**encoded)
-        probabilities_tensor = torch.softmax(outputs.logits, dim=-1)[0]
-    logits = [float(value) for value in outputs.logits[0].detach().cpu().tolist()]
-    probabilities_list = [float(value) for value in probabilities_tensor.detach().cpu().tolist()]
+    primary_input_text = normalize_transformer_inference_text(text) or prepared["cleaned_text"]
+    input_variants: list[tuple[str, str]] = [("train_like_text", primary_input_text)]
+    canonical_input_text = prepared["cleaned_text"]
+    if canonical_input_text and clean_text(primary_input_text) != canonical_input_text:
+        input_variants.append(("canonical_detection_text", canonical_input_text))
+
+    variant_results: list[dict[str, Any]] = []
+    for variant_name, variant_text in input_variants:
+        prediction = _forward_transformer_variant(
+            tokenizer=tokenizer,
+            model=model,
+            torch=torch,
+            device=device,
+            text=variant_text,
+            max_length=max_length,
+        )
+        probabilities = prediction["probabilities"]
+        variant_results.append(
+            {
+                "name": variant_name,
+                "text": variant_text,
+                "riskScore": float(probabilities[LABEL2ID["INJECTION"]]),
+                "probabilities": probabilities,
+                "logits": prediction["logits"],
+            }
+        )
+
+    primary_result = variant_results[0]
+    logits = list(primary_result["logits"])
+    probabilities_list = list(primary_result["probabilities"])
     raw_probabilities_list = list(probabilities_list)
     risk_score = float(probabilities_list[LABEL2ID["INJECTION"]])
     raw_risk_score = risk_score
+    runtime_model_key = canonical_model_key(model_name or model_dir.name)
     calibration_method = None
-    calibrator = _load_probability_calibrator(str(model_dir.resolve()))
+    calibration_source = None
+    calibrated_score: float | None = None
+    intent_adjusted_score: float | None = None
+    score_used = "raw_softmax_probability"
+    benign_guard = detect_benign_reference_intent(text)
+    runtime_benign_intent = (
+        detect_runtime_benign_intent(text)
+        if use_intent_guard
+        else {"triggered": False, "category": None, "disabled": True}
+    )
+    if runtime_benign_intent.get("triggered"):
+        variant_scores = [float(item["riskScore"]) for item in variant_results]
+        evidence_score = min(variant_scores) if runtime_benign_intent.get("useMinimumVariantScore") else raw_risk_score
+        score_cap = float(runtime_benign_intent.get("scoreCap") or evidence_score)
+        intent_adjusted_score = max(0.0, min(1.0, min(evidence_score, score_cap)))
+        risk_score = intent_adjusted_score
+        probabilities_list = [1.0 - risk_score, risk_score]
+        score_used = "intent_adjusted_raw_probability"
+
+    calibration_enabled = (
+        _runtime_calibration_enabled()
+        if use_runtime_calibration is None
+        else bool(use_runtime_calibration)
+    )
+    calibrator = None
+    if calibration_enabled and intent_adjusted_score is None:
+        calibrator = load_runtime_calibrator(runtime_model_key)
+        if calibrator is not None:
+            calibration_source = f"models/calibration/direct_all/{runtime_model_key}/probability_calibrator.joblib"
+        else:
+            calibrator = _load_probability_calibrator(str(model_dir.resolve()))
+            if calibrator is not None:
+                calibration_source = str(model_dir / "probability_calibrator.joblib")
     if calibrator is not None:
-        calibrated_score = calibrator.predict([raw_risk_score])[0]
-        risk_score = float(min(1.0, max(0.0, calibrated_score)))
+        calibrated_score = apply_probability_calibrator(calibrator, raw_risk_score)
+        risk_score = calibrated_score
         probabilities_list = [1.0 - risk_score, risk_score]
         calibration_method = calibrator.__class__.__name__
-    benign_guard = detect_benign_reference_intent(text)
-    # Benign guard is kept as metadata only; the returned risk_score is the true model probability.
+        score_used = "calibrated_probability"
     confidence = float(max(probabilities_list))
     raw_predicted_label = int(np.argmax(raw_probabilities_list))
     predicted_label = int(np.argmax(probabilities_list))
 
     model_key = model_dir.name
     alias_model_key = safe_model_dir_name(model_name or model_dir.name)
+    calibrated_threshold_entry = get_calibrated_threshold_entry(runtime_model_key) if calibration_enabled else None
     saved_thresholds: dict[str, float] | None = None
+    threshold_source = "defaults"
     if thresholds is None:
-        for threshold_path in [MODEL_TRANSFORMER_THRESHOLDS_PATH, MODELS_THRESHOLDS_PATH, TRANSFORMER_THRESHOLDS_PATH]:
-            if not threshold_path.exists():
-                continue
-            try:
-                thresholds_payload = json.loads(threshold_path.read_text(encoding="utf-8-sig"))
-                models_payload = thresholds_payload.get("models", thresholds_payload)
-                saved_thresholds = (
-                    models_payload.get(model_key)
-                    or models_payload.get(alias_model_key)
-                )
-                if saved_thresholds:
-                    break
-            except (json.JSONDecodeError, OSError):
-                saved_thresholds = None
+        if calibration_enabled and calibrated_threshold_entry:
+            saved_thresholds = {
+                "evaluation_threshold": float(calibrated_threshold_entry.get("threshold_eval", DEFAULT_TRANSFORMER_WARN_THRESHOLD)),
+                "runtime_warn_threshold": float(calibrated_threshold_entry.get("threshold_warn", DEFAULT_TRANSFORMER_WARN_THRESHOLD)),
+                "runtime_block_threshold": float(calibrated_threshold_entry.get("threshold_block", DEFAULT_TRANSFORMER_BLOCK_THRESHOLD)),
+            }
+            threshold_source = "models/calibrated_thresholds.json"
+        else:
+            saved_thresholds = _load_checkpoint_thresholds(model_dir)
+            if saved_thresholds:
+                threshold_source = f"{model_dir.name}/metrics_or_training_metadata.json"
+        if saved_thresholds is None:
+            for threshold_path in [MODEL_TRANSFORMER_THRESHOLDS_PATH, MODELS_THRESHOLDS_PATH, TRANSFORMER_THRESHOLDS_PATH]:
+                if not threshold_path.exists():
+                    continue
+                try:
+                    thresholds_payload = json.loads(threshold_path.read_text(encoding="utf-8-sig"))
+                    candidate_payloads = [
+                        thresholds_payload.get("models"),
+                        thresholds_payload.get("transformer_models"),
+                        thresholds_payload,
+                    ]
+                    for models_payload in candidate_payloads:
+                        if not isinstance(models_payload, dict):
+                            continue
+                        saved_thresholds = (
+                            models_payload.get(model_key)
+                            or models_payload.get(alias_model_key)
+                            or models_payload.get(runtime_model_key)
+                        )
+                        if saved_thresholds:
+                            threshold_source = str(threshold_path)
+                            break
+                    if saved_thresholds:
+                        break
+                except (json.JSONDecodeError, OSError):
+                    saved_thresholds = None
+    else:
+        threshold_source = "provided"
 
     resolved_thresholds = thresholds or saved_thresholds or {
         "evaluation_threshold": DEFAULT_TRANSFORMER_WARN_THRESHOLD,
@@ -675,7 +832,12 @@ def predict_transformer(
         "model": model_name or model_dir.name,
         "label": evaluation_label,
         "risk_score": round(risk_score, 8),
+        "raw_score": round(raw_risk_score, 8),
+        "calibrated_score": None if calibrated_score is None else round(float(calibrated_score), 8),
+        "score_used": score_used,
         "raw_risk_score": round(raw_risk_score, 8),
+        "primary_raw_score": round(raw_risk_score, 8),
+        "intent_adjusted_score": None if intent_adjusted_score is None else round(float(intent_adjusted_score), 8),
         "confidence": round(confidence, 8),
         "probabilities": {
             "safe": round(float(probabilities_list[LABEL2ID["SAFE"]]), 8),
@@ -686,18 +848,220 @@ def predict_transformer(
             "injection": round(float(raw_probabilities_list[LABEL2ID["INJECTION"]]), 8),
         },
         "calibration_method": calibration_method,
+        "calibration_source": calibration_source,
+        "calibration_enabled": calibration_enabled,
+        "calibration_warning": (
+            None
+            if calibrator is not None
+            else (
+                "Runtime calibration is disabled; using checkpoint raw probability."
+                if not calibration_enabled
+                else "Không tìm thấy probability_calibrator.joblib cho Transformer này; runtime đang dùng raw softmax probability."
+            )
+        ),
         "benign_guard": benign_guard,
+        "runtime_benign_intent": runtime_benign_intent,
+        "intent_guard_enabled": bool(use_intent_guard),
+        "input_preprocessing": {
+            "primary": "train_like_text",
+            "primary_text": primary_input_text,
+            "canonical_detection_text": canonical_input_text,
+            "training_alignment": "NFC whitespace-normalized raw text, matching v5 training column `text`.",
+        },
+        "input_variants": [
+            {
+                "name": item["name"],
+                "riskScore": round(float(item["riskScore"]), 8),
+                "probabilities": {
+                    "safe": round(float(item["probabilities"][LABEL2ID["SAFE"]]), 8),
+                    "injection": round(float(item["probabilities"][LABEL2ID["INJECTION"]]), 8),
+                },
+                "logits": [round(float(value), 6) for value in item["logits"]],
+            }
+            for item in variant_results
+        ],
         "logits": [round(value, 6) for value in logits],
         "predicted_label": predicted_label,
         "raw_predicted_label": raw_predicted_label,
         "evaluation_label": evaluation_label,
         "runtime_action": runtime_action,
         "thresholds": resolved_thresholds,
+        "threshold_used": {
+            "evaluation": resolved_thresholds["evaluation_threshold"],
+            "warn": warn_threshold,
+            "block": block_threshold,
+        },
+        "threshold_source": threshold_source,
+        "calibration_metadata": calibrated_threshold_entry,
         "runtime_device": str(device),
         "warnings": runtime_warnings,
         "detected_language": prepared["detected_language"],
         "canonical_text": prepared["cleaned_text"],
     }
+
+
+def predict_transformer_batch(
+    texts: list[str],
+    model_path: str | Path,
+    model_name: str | None = None,
+    max_length: int = 128,
+    thresholds: dict[str, float] | None = None,
+    use_cuda: bool = True,
+    use_intent_guard: bool = True,
+    use_runtime_calibration: bool | None = None,
+    batch_size: int = 8,
+) -> list[dict[str, Any]]:
+    """Run production-equivalent inference for several texts in bounded batches.
+
+    Production currently disables probability calibration. If calibration is
+    explicitly enabled, this function delegates to the single-item path so the
+    checkpoint-specific calibrator semantics remain identical.
+    """
+    if not texts:
+        return []
+    calibration_enabled = (
+        _runtime_calibration_enabled()
+        if use_runtime_calibration is None
+        else bool(use_runtime_calibration)
+    )
+    if calibration_enabled:
+        return [
+            predict_transformer(
+                text=text,
+                model_path=model_path,
+                model_name=model_name,
+                max_length=max_length,
+                thresholds=thresholds,
+                use_cuda=use_cuda,
+                use_intent_guard=use_intent_guard,
+                use_runtime_calibration=True,
+            )
+            for text in texts
+        ]
+
+    model_dir = Path(model_path)
+    if not is_finetuned_transformer_checkpoint(model_dir):
+        raise FileNotFoundError(f"Transformer checkpoint not found or not fine-tuned: {model_dir}.")
+    model_dir_key = str(model_dir.resolve())
+    effective_use_cuda = use_cuda and model_dir_key not in CUDA_DISABLED_MODEL_DIRS
+    runtime_warnings: list[str] = []
+    try:
+        torch, tokenizer, model, device = _load_transformer_artifacts_cached(model_dir_key, effective_use_cuda)
+    except RuntimeError as exc:
+        if not effective_use_cuda or "out of memory" not in str(exc).lower():
+            raise
+        CUDA_DISABLED_MODEL_DIRS.add(model_dir_key)
+        _load_transformer_artifacts_cached.cache_clear()
+        runtime_warnings.append("CUDA out of memory; Transformer batch inference fell back to CPU.")
+        torch, tokenizer, model, device = _load_transformer_artifacts_cached(model_dir_key, False)
+
+    prepared_items: list[dict[str, Any]] = []
+    flat_inputs: list[str] = []
+    for text in texts:
+        prepared = prepare_text_for_detection(text)
+        primary = normalize_transformer_inference_text(text) or prepared["cleaned_text"]
+        variants = [("train_like_text", primary)]
+        canonical = prepared["cleaned_text"]
+        if canonical and clean_text(primary) != canonical:
+            variants.append(("canonical_detection_text", canonical))
+        start = len(flat_inputs)
+        flat_inputs.extend(value for _, value in variants)
+        prepared_items.append({"prepared": prepared, "primary": primary, "canonical": canonical, "variants": variants, "start": start})
+
+    flat_results: list[dict[str, Any]] = []
+    resolved_batch_size = max(1, int(batch_size))
+    for start in range(0, len(flat_inputs), resolved_batch_size):
+        encoded = tokenizer(
+            flat_inputs[start : start + resolved_batch_size],
+            truncation=True,
+            padding=True,
+            max_length=max_length,
+            return_tensors="pt",
+        )
+        encoded = {key: value.to(device) for key, value in encoded.items()}
+        with torch.no_grad():
+            outputs = model(**encoded)
+            probabilities = torch.softmax(outputs.logits, dim=-1)
+        for row_index in range(probabilities.shape[0]):
+            flat_results.append(
+                {
+                    "logits": [float(value) for value in outputs.logits[row_index].detach().cpu().tolist()],
+                    "probabilities": [float(value) for value in probabilities[row_index].detach().cpu().tolist()],
+                }
+            )
+
+    resolved_thresholds = thresholds or _load_checkpoint_thresholds(model_dir) or {
+        "evaluation_threshold": DEFAULT_TRANSFORMER_WARN_THRESHOLD,
+        "runtime_warn_threshold": DEFAULT_TRANSFORMER_WARN_THRESHOLD,
+        "runtime_block_threshold": DEFAULT_TRANSFORMER_BLOCK_THRESHOLD,
+    }
+    evaluation_threshold = float(resolved_thresholds.get("evaluation_threshold", DEFAULT_TRANSFORMER_WARN_THRESHOLD))
+    warn_threshold = float(resolved_thresholds.get("runtime_warn_threshold", DEFAULT_TRANSFORMER_WARN_THRESHOLD))
+    block_threshold = max(float(resolved_thresholds.get("runtime_block_threshold", DEFAULT_TRANSFORMER_BLOCK_THRESHOLD)), warn_threshold)
+
+    results: list[dict[str, Any]] = []
+    for original_text, item in zip(texts, prepared_items):
+        count = len(item["variants"])
+        model_rows = flat_results[item["start"] : item["start"] + count]
+        variant_results = []
+        for (variant_name, _), row in zip(item["variants"], model_rows):
+            variant_results.append({
+                "name": variant_name,
+                "riskScore": float(row["probabilities"][LABEL2ID["INJECTION"]]),
+                "probabilities": row["probabilities"],
+                "logits": row["logits"],
+            })
+        raw_score = float(variant_results[0]["riskScore"])
+        risk_score = raw_score
+        intent_adjusted_score: float | None = None
+        runtime_benign_intent = detect_runtime_benign_intent(original_text) if use_intent_guard else {"triggered": False, "category": None, "disabled": True}
+        score_used = "raw_softmax_probability"
+        if runtime_benign_intent.get("triggered"):
+            variant_scores = [float(entry["riskScore"]) for entry in variant_results]
+            evidence_score = min(variant_scores) if runtime_benign_intent.get("useMinimumVariantScore") else raw_score
+            score_cap = float(runtime_benign_intent.get("scoreCap") or evidence_score)
+            intent_adjusted_score = max(0.0, min(1.0, min(evidence_score, score_cap)))
+            risk_score = intent_adjusted_score
+            score_used = "intent_adjusted_raw_probability"
+        probabilities_list = [1.0 - risk_score, risk_score]
+        results.append({
+            "model": model_name or model_dir.name,
+            "risk_score": round(risk_score, 8),
+            "raw_score": round(raw_score, 8),
+            "primary_raw_score": round(raw_score, 8),
+            "calibrated_score": None,
+            "intent_adjusted_score": None if intent_adjusted_score is None else round(intent_adjusted_score, 8),
+            "score_used": score_used,
+            "confidence": round(max(probabilities_list), 8),
+            "predicted_label": int(risk_score >= 0.5),
+            "evaluation_label": int(risk_score >= evaluation_threshold),
+            "runtime_action": action_from_score(risk_score, warn_threshold, block_threshold),
+            "thresholds": {
+                "evaluation_threshold": evaluation_threshold,
+                "runtime_warn_threshold": warn_threshold,
+                "runtime_block_threshold": block_threshold,
+            },
+            "threshold_used": {"evaluation": evaluation_threshold, "warn": warn_threshold, "block": block_threshold},
+            "threshold_source": "provided" if thresholds else "checkpoint_or_defaults",
+            "runtime_device": str(device),
+            "calibration_enabled": False,
+            "calibration_source": None,
+            "runtime_benign_intent": runtime_benign_intent,
+            "benign_guard": detect_benign_reference_intent(original_text),
+            "input_preprocessing": {"primary": "train_like_text", "training_alignment": "NFC whitespace-normalized raw text."},
+            "input_variants": [
+                {
+                    "name": entry["name"],
+                    "riskScore": round(float(entry["riskScore"]), 8),
+                    "probabilities": {"safe": round(float(entry["probabilities"][0]), 8), "injection": round(float(entry["probabilities"][1]), 8)},
+                    "logits": [round(float(value), 6) for value in entry["logits"]],
+                }
+                for entry in variant_results
+            ],
+            "warnings": list(runtime_warnings),
+            "detected_language": item["prepared"]["detected_language"],
+        })
+    return results
 
 
 def diagnose_transformer(

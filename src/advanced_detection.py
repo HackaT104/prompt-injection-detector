@@ -33,6 +33,14 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 REPORTS_DIR = PROJECT_ROOT / "reports"
 OUTPUTS_DIR = PROJECT_ROOT / "outputs"
 
+
+def _read_json_report(path: Path) -> tuple[dict[str, Any], str | None]:
+    try:
+        return json.loads(path.read_text(encoding="utf-8-sig")), None
+    except (OSError, MemoryError, json.JSONDecodeError) as exc:
+        return {}, f"{type(exc).__name__}: {exc}"
+
+
 TRADITIONAL_MODEL_ALIASES = {
     "all": "all",
     "all_traditional": "all",
@@ -209,11 +217,18 @@ def _compact_ml_signal(result: dict[str, Any] | None, enabled: bool, model_name:
         "confidence": result.get("confidence"),
         "probabilities": result.get("probabilities"),
         "raw_score": result.get("raw_score"),
+        "calibrated_score": result.get("calibrated_score"),
+        "score_used": result.get("score_used"),
         "raw_risk_score": result.get("raw_risk_score"),
         "raw_probabilities": result.get("raw_probabilities"),
+        "calibration_method": result.get("calibration_method"),
+        "calibration_source": result.get("calibration_source"),
+        "calibration_warning": result.get("calibration_warning"),
         "benign_guard": result.get("benign_guard"),
         "action": result.get("action", result.get("runtime_action", "allow")),
         "thresholds": result.get("thresholds"),
+        "threshold_used": result.get("threshold_used"),
+        "threshold_source": result.get("threshold_source"),
         "message": result.get("message"),
         "error": result.get("message") if result.get("error") else None,
         "model_path": result.get("model_path") or result.get("missing_path"),
@@ -275,6 +290,9 @@ def _run_transformer(text: str, transformer_model: str, use_cuda: bool = True) -
         "available": True,
         "label": result["evaluation_label"],
         "risk_score": result["risk_score"],
+        "raw_score": result.get("raw_score"),
+        "calibrated_score": result.get("calibrated_score"),
+        "score_used": result.get("score_used"),
         "raw_risk_score": result.get("raw_risk_score"),
         "confidence": result["confidence"],
         "probabilities": result["probabilities"],
@@ -286,6 +304,12 @@ def _run_transformer(text: str, transformer_model: str, use_cuda: bool = True) -
         "method": f"transformer_{runtime_name}",
         "model_path": str(model_dir),
         "thresholds": result["thresholds"],
+        "threshold_used": result.get("threshold_used"),
+        "threshold_source": result.get("threshold_source"),
+        "calibration_method": result.get("calibration_method"),
+        "calibration_source": result.get("calibration_source"),
+        "calibration_warning": result.get("calibration_warning"),
+        "calibration_metadata": result.get("calibration_metadata"),
         "runtime_device": result.get("runtime_device"),
         "runtime_warnings": result.get("warnings", []),
         "canonical_text": result.get("canonical_text"),
@@ -752,6 +776,12 @@ def _compare_row_from_result(model_name: str, result: dict[str, Any]) -> dict[st
         "model_path": _model_path_for_compare(model_name, signal),
         "available": bool(available),
         "raw_score": raw_score,
+        "calibrated_score": signal.get("calibrated_score"),
+        "score_used": signal.get("score_used"),
+        "calibration_method": signal.get("calibration_method"),
+        "calibration_warning": signal.get("calibration_warning"),
+        "threshold_used": signal.get("threshold_used") or signal.get("thresholds"),
+        "threshold_source": signal.get("threshold_source"),
         "prediction": decision.get("label"),
         "predicted_label": signal.get("predicted_label", decision.get("label")),
         "action": action if available else "model_not_ready",
@@ -806,6 +836,37 @@ def _compare_error_row(model_name: str, exc: Exception) -> dict[str, Any]:
     }
 
 
+def _compare_skipped_row(
+    model_name: str,
+    reason: str,
+    hybrid_config: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    row = _compare_error_row(model_name, RuntimeError(reason))
+    row["action"] = "skipped_by_rule_gate"
+    row["warnings"] = [reason]
+    if _normalize_model_name(model_name) == "hybrid":
+        config = hybrid_config or {}
+        decision_strategy = str(config.get("decision_strategy", "weighted_voting")).strip().lower()
+        if decision_strategy not in {"majority_vote", "maximum_risk", "weighted_voting"}:
+            decision_strategy = "weighted_voting"
+        normalized_config = {
+            "traditional_model": _normalize_traditional_model(config.get("traditional_model") or "all"),
+            "transformer_model": _normalize_transformer_model(config.get("transformer_model")),
+            "use_rule_based": bool(config.get("use_rule_based", True)),
+            "decision_strategy": decision_strategy,
+        }
+        row.update(
+            {
+                "selected_models": _hybrid_selected_models({"hybrid_config": normalized_config}),
+                "voting_strategy": decision_strategy,
+                "individual_scores": [],
+                "final_score": None,
+                "final_action": "skipped_by_rule_gate",
+            }
+        )
+    return row
+
+
 def compare_all_models(
     text: str,
     input_type: str = "text",
@@ -816,7 +877,16 @@ def compare_all_models(
         raise ValueError("text khong duoc rong khi compare models.")
 
     rows: list[dict[str, Any]] = []
+    rule_gate = detect_by_rules(text)
+    transformer_skip_reason = (
+        "Skipped transformer benchmark inference because the rule-based gate already blocked this prompt."
+        if rule_gate.get("action") == "block"
+        else ""
+    )
     for model_name in COMPARISON_MODELS:
+        if transformer_skip_reason and model_name in {"roberta", "xlm_roberta", "hybrid"}:
+            rows.append(_compare_skipped_row(model_name, transformer_skip_reason, hybrid_config))
+            continue
         try:
             result = detect_prompt_advanced(
                 text=text,
@@ -858,10 +928,15 @@ def get_project_statistics() -> dict[str, Any]:
         },
         "models": {},
         "sources": [],
+        "warnings": [],
     }
 
     if metrics_path.exists():
-        metrics = json.loads(metrics_path.read_text(encoding="utf-8-sig"))
+        metrics, error = _read_json_report(metrics_path)
+        if error:
+            payload["warnings"].append(f"Could not read {metrics_path}: {error}")
+        if not metrics:
+            return payload
         dataset = metrics.get("dataset", {})
         split = metrics.get("split", {})
         payload["dataset"].update(
@@ -883,7 +958,10 @@ def get_project_statistics() -> dict[str, Any]:
         payload["sources"].append(str(metrics_path))
 
     if transformer_path.exists():
-        transformer_results = json.loads(transformer_path.read_text(encoding="utf-8-sig"))
+        transformer_results, error = _read_json_report(transformer_path)
+        if error:
+            payload["warnings"].append(f"Could not read {transformer_path}: {error}")
+            transformer_results = {}
         for model_name, result in transformer_results.get("models", {}).items():
             test_metrics = result.get("test_metrics", {})
             payload["models"][model_name] = {
@@ -892,9 +970,54 @@ def get_project_statistics() -> dict[str, Any]:
                 "recall": test_metrics.get("recall"),
                 "f1": test_metrics.get("f1"),
             }
-        payload["sources"].append(str(transformer_path))
+        if transformer_results:
+            payload["sources"].append(str(transformer_path))
 
     return payload
+
+
+def _rule_block_mock_detection(user_prompt: str, rule_result: dict[str, Any]) -> dict[str, Any]:
+    risk_score = float(rule_result.get("risk_score", 0.0) or 0.0)
+    return {
+        "input": {
+            "input_type": "text",
+            "text_preview": str(user_prompt)[:220],
+            "detected_language": rule_result.get("detected_language"),
+            "file_name": None,
+            "mime_type": None,
+        },
+        "decision": {
+            "label": rule_result.get("label", 1),
+            "risk_score": risk_score,
+            "action": "block",
+            "method": "mock_llm_rule_gate",
+            "processing_time_ms": 0.0,
+        },
+        "signals": {
+            "rule_based": {
+                "enabled": True,
+                "score": rule_result.get("rule_score", risk_score),
+                "action": rule_result.get("action"),
+                "matched_rules": rule_result.get("matched_rules", []),
+            },
+            "traditional_ml": {"enabled": False, "skipped": "rule_block"},
+            "transformer": {"enabled": False, "skipped": "rule_block"},
+        },
+        "hybrid_config": {
+            "decision_strategy": "rule_block_short_circuit",
+            "use_rule_based": True,
+        },
+        "hybrid_breakdown": {
+            "strategy": "rule_block_short_circuit",
+            "final_score": risk_score,
+        },
+        "explainability": {
+            "rule_matches": rule_result.get("matched_rules", []),
+            "note": "Mock LLM skipped expensive model inference because the rule gate blocked the prompt.",
+        },
+        "warnings": ["Mock LLM rule gate blocked the prompt before transformer inference."],
+        "explanation": rule_result.get("explanation"),
+    }
 
 
 def simulate_chat_detection(
@@ -903,12 +1026,16 @@ def simulate_chat_detection(
     hybrid_config: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Simulate detector-gated LLM deployment without calling a real LLM."""
-    detection = detect_prompt_advanced(
-        text=user_prompt,
-        input_type="text",
-        model=model,
-        hybrid_config=hybrid_config,
-    )
+    rule_gate = detect_by_rules(user_prompt)
+    if rule_gate.get("action") == "block":
+        detection = _rule_block_mock_detection(user_prompt, rule_gate)
+    else:
+        detection = detect_prompt_advanced(
+            text=user_prompt,
+            input_type="text",
+            model=model,
+            hybrid_config=hybrid_config,
+        )
     action = detection.get("decision", {}).get("action")
     forwarded_to_mock_llm = False
     if action == "model_not_ready":
